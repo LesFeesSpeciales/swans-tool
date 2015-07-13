@@ -53,61 +53,6 @@ ___________________________________________________________________"""
 def get_activeSceneObject():
     return bpy.context.scene.objects.active.name
 
-
-# ui list item actions
-class Uilist_actions(bpy.types.Operator):
-    bl_idname = "custom.list_action"
-    bl_label = "List Action"
-
-    action = bpy.props.EnumProperty(
-        items=(
-            ('UP', "Up", ""),
-            ('DOWN', "Down", ""),
-            ('REMOVE', "Remove", ""),
-            ('ADD', "Add", ""),
-        )
-    )
-
-    def invoke(self, context, event):
-
-        scn = context.scene
-        idx = scn.custom_index
-
-        try:
-            item = scn.custom[idx]
-        except IndexError:
-            pass
-
-        else:
-            if self.action == 'DOWN' and idx < len(scn.custom) - 1:
-                item_next = scn.custom[idx+1].name
-                scn.custom_index += 1
-                info = 'Item %d selected' % (scn.custom_index + 1)
-                self.report({'INFO'}, info)
-
-            elif self.action == 'UP' and idx >= 1:
-                item_prev = scn.custom[idx-1].name
-                scn.custom_index -= 1
-                info = 'Item %d selected' % (scn.custom_index + 1)
-                self.report({'INFO'}, info)
-
-            elif self.action == 'REMOVE':
-                info = 'Item %s removed from list' % (scn.custom[scn.custom_index].name)
-                scn.custom_index -= 1
-                self.report({'INFO'}, info)
-                scn.custom.remove(idx)
-
-        if self.action == 'ADD':
-            item = scn.custom.add()
-            item.id = len(scn.custom)
-            
-            item.name = get_activeSceneObject() # assign name of selected object
-            scn.custom_index = (len(scn.custom)-1)
-            info = '%s added to list' % (item.name)
-            self.report({'INFO'}, info)
-
-        return {"FINISHED"}
-
 # -------------------------------------------------------------------
 # draw
 # -------------------------------------------------------------------
@@ -321,9 +266,10 @@ class Help(bpy.types.Operator):
     def execute(self, context):
         bpy.ops.wm.url_open(url="http://les-fees-speciales.coop/wiki/")
         return {"FINISHED"}
+    
 '''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-                hide opener
+                hide console
 
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'''         
 class XP(bpy.types.Operator):
@@ -354,22 +300,7 @@ class hide(bpy.types.Operator):
             context.scene.hidecreator = True
             
         return {"FINISHED"}
-'''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-                hide operator
-
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'''         
-class hideo(bpy.types.Operator):
-    bl_idname = "scene.hideo"
-    bl_label = "hideo"
-    
-    def execute(self, context):
-        if context.scene.hideopener:
-            context.scene.hideopener = False
-        else:
-            context.scene.hideopener = True
-            
-        return {"FINISHED"}
 '''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
                 GUI CREATION
@@ -387,28 +318,22 @@ class naming_panel(bpy.types.Panel):
         scn = context.scene    
         row = layout.row()
         box = layout.box()
-        #draw_opener(self,bpy.context,command)
+        #Example of external drawing function: draw_opener(self,bpy.context,command)
         
-        row = box.row(align=True) 
-        if scn.hidecreator:
-            
-            #row.alignment='LEFT'
-            
+        row = box.row(align=True)
+        
+        #---> PANEL HIDE 
+        if scn.hidecreator:            
             row.operator("scene.hide",text="",emboss=False,icon='TRIA_RIGHT')    
-            #row.prop(context.scene,"mode",text='',expand =True,emboss=True,icon_only=True)
             
             row.label(text='FILE TOOLS')
-            #row.label(text=context.scene.mode+' MODE')
-            #row.alignment='RIGHT'
             row.separator()
             row.operator("scene.help",text="",emboss=False,icon='HELP')
-                
+            
+        #---> PANEL NOT HIDE        
         elif not scn.hidecreator:
-            #row.alignment='EXPAND'
             row.operator("scene.hide",text="",emboss=False,icon='TRIA_DOWN') 
-            #row.prop(context.scene,"mode",text='',expand =True,emboss=True,icon_only=True)
-            row.label(text='FILE TOOLS')
-            #row.alignment='RIGHT'
+            row.label(text='FILE TOOLS')   
             
             row.operator("scene.help",text="",emboss=False,icon='HELP')
             row = box.row()
@@ -422,8 +347,6 @@ class naming_panel(bpy.types.Panel):
 
                 col = split.column()
                 sub = col.column(align=True)
-                #col = layout.column()
-                #subrow = row.row(align=True)
                 sub.label(text="New store dir:") 
     
                 sub.prop(context.scene, "FPath",text='',icon_only=True)
