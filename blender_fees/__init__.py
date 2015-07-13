@@ -49,60 +49,6 @@ LAYOUT INFO:
 test:
 ___________________________________________________________________"""
 
-# return name of selected object
-def get_activeSceneObject():
-    return bpy.context.scene.objects.active.name
-
-# -------------------------------------------------------------------
-# draw
-# -------------------------------------------------------------------
-
-# custom list
-class UL_items(UIList):
-
-    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
-        split = layout.split(0.6)
-        split.prop(item, "name", text="", emboss=False, translate=False, icon='FILE')
-        split.label("Version: %d" % (index))
-
-    def invoke(self, context, event):
-        pass   
-
-# print button
-class Uilist_printAllItems(bpy.types.Operator):
-    bl_idname = "custom.print_list"
-    bl_label = "Print List"
-    bl_description = "Print all items to the console"
-
-    def execute(self, context):
-        scn = context.scene
-        for i in scn.custom:
-            print (i.name, i.id)
-        return{'FINISHED'}
-
-# select button
-class Uilist_printAllItems(bpy.types.Operator):
-    bl_idname = "custom.select_item"
-    bl_label = "Select List Item"
-    bl_description = "Select Item in scene"
-
-    def execute(self, context):
-        scn = context.scene
-        bpy.ops.object.select_all(action='DESELECT')
-        obj = bpy.data.objects[scn.custom[scn.custom_index].name]
-        obj.select = True
-
-        return{'FINISHED'}
-
-
-# Create custom property group
-class CustomProp(bpy.types.PropertyGroup):
-    '''name = StringProperty() '''
-    id = IntProperty()
-
-
-command=['test','test2','test2','test2']
-folders =[]
 
 '''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -225,20 +171,84 @@ def initSceneProperties(scn):
                ('P_003', "P_003", ""),
                ('NEW', "NEW", "")),
         default='none')  
-     '''-----------------------------------------
-     
-                    OPENER VARS
-     
-     -----------------------------------------'''
-     bpy.types.Scene.hideopener = BoolProperty(
-        name = "hideopener", 
-        default=False,
-        description = "hide console")
            
 def update_value(self,context,type):
     print('update drive')
          
     return None
+
+
+'''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+                     File List
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'''
+# return name of selected object
+def get_activeSceneObject():
+    return bpy.context.scene.objects.active.name
+
+# custom list
+class UL_items(UIList):
+
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+        split = layout.split(0.6)
+        split.prop(item, "name", text="", emboss=False, translate=False, icon='FILE')
+        split.label("Version: %d" % (index))
+
+    def invoke(self, context, event):
+        pass   
+
+# Create custom property group
+class CustomProp(bpy.types.PropertyGroup):
+    '''name = StringProperty() '''
+    id = IntProperty()
+
+
+command=['test','test2','test2','test2']
+folders =[]
+
+'''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+                OPEN DIR OPERATOR
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>''' 
+class OBJECT_OT_custompath(bpy.types.Operator):
+    bl_idname = "object.custom_path"
+    bl_label = "Select folder"
+    __doc__ = ""
+    
+    
+    filename_ext = ".txt"
+    filter_glob = StringProperty(default="*.txt", options={'HIDDEN'})    
+        
+    
+    #this can be look into the one of the export or import python file.
+    #need to set a path so so we can get the file name and path
+    filepath = StringProperty(name="File Path", description="Filepath used for importing txt files", maxlen= 1024, default= "")
+    files = CollectionProperty(
+        name="File Path",
+        type=bpy.types.OperatorFileListElement,
+        )    
+    def execute(self, context):
+        #set the string path fo the file here.
+        #this is a variable created from the top to start it
+        bpy.context.scene.MyString = self.properties.filepath
+        
+        
+        print("*************SELECTED FILES ***********")
+        for file in self.files:
+            print(file.name)
+        
+        print("FILEPATH %s"%self.properties.filepath)#display the file name and current path        
+        return {'FINISHED'}
+
+
+    def draw(self, context):
+        self.layout.operator('file.select_all_toggle')        
+    def invoke(self, context, event):
+        wm = context.window_manager
+        wm.fileselect_add(self)
+        return {'RUNNING_MODAL'}
 
 '''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -512,6 +522,8 @@ class naming_panel(bpy.types.Panel):
                         box2.label(text=">> "+command[i])
                         box2.scale_y=0.3
                         box2=box.row()
+                        
+                    box2.template_ID(context.texture_user, context.texture_user_property.identifier, new="texture.new")
                     
 
 """=============================================
@@ -548,6 +560,7 @@ def register():
     bpy.utils.register_module(__name__)
     bpy.types.Scene.custom = CollectionProperty(type=CustomProp)
     bpy.types.Scene.custom_index = IntProperty()
+    bpy.utils.register_class(OBJECT_OT_custompath)
     '''bpy.utils.register_class(hideo)
     bpy.utils.register_class(hide)
     bpy.utils.register_class(XP)
@@ -565,6 +578,7 @@ def unregister():
     bpy.utils.unregister_class(Help)
     bpy.utils.unregister_class(createF)
     bpy.utils.unregister_class(naming_panel)
+    bpy.utils.unregister_class(OBJECT_OT_custompath)
     
 if __name__ == "__main__":
     initSceneProperties(bpy.context.scene)  
