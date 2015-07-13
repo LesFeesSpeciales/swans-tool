@@ -34,7 +34,7 @@ from bpy.props import *
 import sys
 sys.path.append('/home/armabon/u/lib/python3x')
 import naming.Herakles as naming
-from opener import *
+#from opener import *
 from bpy.props import IntProperty, CollectionProperty #, StringProperty 
 from bpy.types import Panel, UIList
 
@@ -292,8 +292,6 @@ def initSceneProperties(scn):
            
 def update_value(self,context,type):
     print('update drive')
-    #if type =='drive':
-       #command.append(context.scene.drives)
          
     return None
 
@@ -553,11 +551,7 @@ class naming_panel(bpy.types.Panel):
                 sub = col.column(align=True)
                 sub.prop(scn, "dpt",expand=False,text='')
          
-                  
-                row = box.row()
-                #row = box.row()
-                #box= box.row()
-                
+                row = box.row()               
                 
                 rows = 3
                 row.template_list("UL_items", "", scn, "custom", scn, "custom_index", rows=rows)
@@ -583,8 +577,6 @@ class naming_panel(bpy.types.Panel):
                     row.operator("scene.xp",text="",emboss=False,icon='ZOOMIN') 
                    
                     
-                    #row.label(text=">> "+command[len(command)-1])
-                    
                 elif not scn.hidec:
                     row.label(text='output',icon='CONSOLE')
                     row.operator("scene.xp",text="",emboss=False,icon='ZOOMOUT') 
@@ -598,59 +590,6 @@ class naming_panel(bpy.types.Panel):
                         box2.scale_y=0.3
                         box2=box.row()
                     
-#        '''==================================================================
-#        
-#                            OPENER BETA CLOSE
-#        
-#        =================================================================='''
-#        
-#        layout = self.layout   
-#        scn = context.scene    
-#        row = layout.row()
-#        box = layout.box()
-#         
-#        row = box.row(align=True) 
-#        if scn.hideopener:
-#            row.operator("scene.hideo",text="",emboss=False,icon='TRIA_RIGHT') 
-#            row.label(text="OPEN")
-#            #row.alignment='RIGHT'
-#            
-#            row.operator("scene.help",text="",emboss=False,icon='HELP')
-#                
-#        elif not scn.hideopener:
-#            #row.alignment='EXPAND'
-#            row.operator("scene.hideo",text="",emboss=False,icon='TRIA_DOWN') 
-#            row.label(text="OPEN")
-#            #row.alignment='RIGHT'
-#            
-#            row.operator("scene.help",text="",emboss=False,icon='HELP')
-#            row = box.row()
-#            row.scale_y=1.5
-#            row = box.row()
-#            row.prop(context.scene,"drives",text="",icon='DISK_DRIVE')
-#            #col = layout.column()
-#            row = box.row()
-#            row.prop(context.scene, "roots", expand=True)
-#
-#
-#            #row = layout.row()
-#
-#                
-#            #row = layout.row()
-#                    
-#            row = box.row()
-#            box2 = row.box()
-#            box2.label(text=" Repertoires",icon='FILE_FOLDER')
-#            
-#            row = box.row()
-#            
-#
-#            
-#            row.scale_y=1.5
-#            row.alignment='CENTER'
-#            row.operator("scene.createf",text="OPEN",emboss=True,icon='NEWFOLDER')           
-#            row.enabled =  False
-#            row = box.row()
 
 """=============================================
         
@@ -686,24 +625,22 @@ def register():
     bpy.utils.register_module(__name__)
     bpy.types.Scene.custom = CollectionProperty(type=CustomProp)
     bpy.types.Scene.custom_index = IntProperty()
-    #bpy.utils.register_class(opening_panel)
-    bpy.utils.register_class(hideo)
+    '''bpy.utils.register_class(hideo)
     bpy.utils.register_class(hide)
     bpy.utils.register_class(XP)
     bpy.utils.register_class(Help)
     bpy.utils.register_class(createF)
     bpy.utils.register_class(naming_panel)
-    
+    '''
 def unregister():
     bpy.utils.unregister_module(__name__)
     del bpy.types.Scene.custom
     del bpy.types.Scene.custom_index
-    #bpy.utils.register_class(opening_panel)
-    bpy.utils.register_class(hideo)
-    bpy.utils.register_class(hide)
-    bpy.utils.register_class(XP)
-    bpy.utils.register_class(Help)
-    bpy.utils.register_class(createF)
+    bpy.utils.unregister_class(hideo)
+    bpy.utils.unregister_class(hide)
+    bpy.utils.unregister_class(XP)
+    bpy.utils.unregister_class(Help)
+    bpy.utils.unregister_class(createF)
     bpy.utils.unregister_class(naming_panel)
     
 if __name__ == "__main__":
