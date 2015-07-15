@@ -34,7 +34,6 @@ from bpy.props import *
 import sys
 sys.path.append('/home/armabon/u/lib/python3x')
 import naming.Herakles as naming
-#from opener import *
 from bpy.props import IntProperty, CollectionProperty #, StringProperty 
 from bpy.types import Panel, UIList
 
@@ -55,6 +54,11 @@ ___________________________________________________________________"""
                 VAR INIT
 
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'''
+
+#Default vars
+drives = (('tzqt',"test",''),('tzqt',"test",''))
+
+
 def initSceneProperties(scn):
      bpy.types.Scene.FPath = StringProperty(
         name="",
@@ -200,7 +204,7 @@ class UL_items(UIList):
 
 # Create custom property group
 class CustomProp(bpy.types.PropertyGroup):
-    '''name = StringProperty() '''
+    name = StringProperty() 
     id = IntProperty()
 
 
@@ -214,7 +218,7 @@ folders =[]
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>''' 
 class OBJECT_OT_custompath(bpy.types.Operator):
     bl_idname = "object.custom_path"
-    bl_label = "Select folder"
+    bl_label = "open"
     __doc__ = ""
     
     
@@ -239,7 +243,8 @@ class OBJECT_OT_custompath(bpy.types.Operator):
         for file in self.files:
             print(file.name)
         
-        print("FILEPATH %s"%self.properties.filepath)#display the file name and current path        
+        print("FILEPATH %s"%self.properties.filepath)#display the file name and current path    
+        bpy.context.scene.drives
         return {'FINISHED'}
 
 
@@ -249,6 +254,22 @@ class OBJECT_OT_custompath(bpy.types.Operator):
         wm = context.window_manager
         wm.fileselect_add(self)
         return {'RUNNING_MODAL'}
+
+
+'''---------------------------------------------------
+
+                General function to update
+                      -EnumProperty-
+
+---------------------------------------------------'''
+
+def UpdateEnum(Enum,Items,Name,Description,Default):
+    Enum = EnumProperty(
+        name=Name,
+        description=Description,
+        items = Items,
+        default=Default)        
+
 
 '''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -347,183 +368,184 @@ class naming_panel(bpy.types.Panel):
             
             row.operator("scene.help",text="",emboss=False,icon='HELP')
             row = box.row()
+                            
+            row.scale_y=1.5
+            row = box.row()
             
-            if scn.mode != 'CHECK':
+            split = row.split()
+
+            col = split.column()
+            
+            sub = col.column(align=True)
+            sub.label(text="Project dir:") 
+            
+            #addd=========================================================
+            
+            subrow = sub.row(align=True)
+        
+            subrow.prop(context.scene,"drives",text="")
+            subrow.operator("object.custom_path",text="", icon='FILE_FOLDER')
+            
+            #=============================================================
+            row = box.row()
                 
-                row.scale_y=1.5
-                row = box.row()
-              
-                split = row.split()
+            row.prop(context.scene, "roots", expand=True)
 
-                col = split.column()
-                sub = col.column(align=True)
-                sub.label(text="New store dir:") 
-    
-                sub.prop(context.scene, "FPath",text='',icon_only=True)
-               
-                col = split.column()
-                sub = col.column(align=True)
-                sub.label(text="Bookmarks:")
-                sub.prop(context.scene,"drives",text="",icon='BOOKMARKS')
+            ''' IF MOVIE'''
+            if scn.roots == 'MOVIE':         
+                row = box.row()
+                box = row.box()
+                row = box.row(align=True)
+ 
                 
-                row = box.row()
-                row.prop(context.scene, "roots", expand=True)
-
-                ''' IF MOVIE'''
-                if scn.roots == 'MOVIE':         
-                    row = box.row()
-                    box = row.box()
-                    row = box.row(align=True)
-     
-                    
-                    #SEQ=============================================
-                    if(scn.seq=='none'):
-                        row.label(text=" SEQUENCE",icon='QUESTION')
-                    else:
-                        row.label(text=" SEQUENCE",icon='FILE_TICK')
-                    row = box.row(align=True)     
-                    
-                    #type setting------------------------------------- 
-                    split = row.split(align=True)
-                    
-                    col = split.column()   
-                    sub = col.column(align=True)
-                    sub.prop(scn, "seq",expand=False,text='')
-                    #row = box.row()
-                    
-                    if scn.seq == 'NEW':
-                        sub.prop(scn, "newF")
-                        
-                    row = box.row()
-                    
-                    #SHOT=============================================
-                    if(scn.shot=='none'):
-                        row.label(text=" SHOT",icon='QUESTION')
-                    else:
-                        row.label(text=" SHOT",icon='FILE_TICK')
-                    row = box.row(align=True)     
-                    
-                    #type setting------------------------------------- 
-                    split = row.split(align=True)
-                    
-                    col = split.column()   
-                    sub = col.column(align=True)
-                    sub.prop(scn, "shot",expand=False,text='')
-                    #row = box.row()
-                    
-                    if scn.shot == 'NEW':
-                        sub.prop(scn, "newF")
-                        
-                    row = box.row()
-                      
-                   
-         
-                elif scn.roots == 'LIB':
-                    row = box.row()
-                    box = row.box()
-                    row = box.row()
-                    
-                    
-                    if(scn.type=='none'):
-                        row.label(text=" TYPE",icon='QUESTION')
-                    else:
-                        row.label(text=" TYPE",icon='FILE_TICK')
-                    row = box.row(align=True)     
-                    
-                    #type setting-------------------------------------    
-                    row.prop(scn,"type",expand=True,icon_value=4)
-                    row = box.row()
-                    
-                    
-                    #familly setting----------------------------------
-                    
-                    #row = box.row()    
-                    split = row.split(align=True)
-                    
-                    col = split.column()  
-                    
-                    if(scn.famille=='none'):
-                        col.label(text=" FAMILLE",icon='QUESTION')
-                    else:
-                        col.label(text="FAMILLE",icon='FILE_TICK')
-                    #col.row(align=True)
-                    sub = col.column(align=True)
-                    sub.prop(scn, "famille",expand=False,text='')
-                    #row = box.row()
-                    
-                    if scn.famille == 'NEW':
-                        sub.prop(scn, "newF")
-                        
-                    row = box.row()
-                    
-                    #asset setting----------------------------------
-                    split = row.split(align=True)
-                    col = split.column()
-                    
-                    if(scn.asset=='none'):
-                        col.label(text=" ASSET",icon='QUESTION')
-                    else:
-                        col.label(text=" ASSET",icon='FILE_TICK')
-                    #col.row(align=True)
-                    sub = col.column(align=True)
-                    sub.prop(scn, "asset",expand=False,text='')
-                    if scn.asset == 'NEW':
-                      sub.prop(scn, "newA")
-                    
-                    row = box.row()
-                    
-                #dpt setting----------------------------------
-                split = row.split(align=True)
-                col = split.column()
-
-                if(scn.dpt=='none'):
-                    col.label(text=" DPT",icon='QUESTION')
+                #SEQ=============================================
+                if(scn.seq=='none'):
+                    row.label(text=" SEQUENCE",icon='QUESTION')
                 else:
-                    col.label(text=" DPT",icon='FILE_TICK')
+                    row.label(text=" SEQUENCE",icon='FILE_TICK')
+                row = box.row(align=True)     
+                
+                #type setting------------------------------------- 
+                split = row.split(align=True)
+                
+                col = split.column()   
+                sub = col.column(align=True)
+                sub.prop(scn, "seq",expand=False,text='')
+                #row = box.row()
+                
+                if scn.seq == 'NEW':
+                    sub.prop(scn, "newF")
+                    
+                row = box.row()
+                
+                #SHOT=============================================
+                if(scn.shot=='none'):
+                    row.label(text=" SHOT",icon='QUESTION')
+                else:
+                    row.label(text=" SHOT",icon='FILE_TICK')
+                row = box.row(align=True)     
+                
+                #type setting------------------------------------- 
+                split = row.split(align=True)
+                
+                col = split.column()   
+                sub = col.column(align=True)
+                sub.prop(scn, "shot",expand=False,text='')
+                #row = box.row()
+                
+                if scn.shot == 'NEW':
+                    sub.prop(scn, "newF")
+                    
+                row = box.row()
+                  
+               
+     
+            elif scn.roots == 'LIB':
+                row = box.row()
+                box = row.box()
+                row = box.row()
+                
+                
+                if(scn.type=='none'):
+                    row.label(text=" TYPE",icon='QUESTION')
+                else:
+                    row.label(text=" TYPE",icon='FILE_TICK')
+                row = box.row(align=True)     
+                
+                #type setting-------------------------------------    
+                row.prop(scn,"type",expand=True,icon_value=4)
+                row = box.row()
+                
+                
+                #familly setting----------------------------------
+                
+                #row = box.row()    
+                split = row.split(align=True)
+                
+                col = split.column()  
+                
+                if(scn.famille=='none'):
+                    col.label(text=" FAMILLE",icon='QUESTION')
+                else:
+                    col.label(text="FAMILLE",icon='FILE_TICK')
                 #col.row(align=True)
                 sub = col.column(align=True)
-                sub.prop(scn, "dpt",expand=False,text='')
-         
-                row = box.row()               
-                
-                rows = 3
-                row.template_list("UL_items", "", scn, "custom", scn, "custom_index", rows=rows)
+                sub.prop(scn, "famille",expand=False,text='')
                 #row = box.row()
-                row = box.row()
-                row.alignment='CENTER'
-                row.scale_y=1.5
-                row.operator("scene.createf",text="NEW",emboss=True,icon='FILE') 
-                row.operator("scene.createf",text="OPEN",emboss=True,icon='NEWFOLDER')
-                row.operator("scene.createf",text="SAVE AS",emboss=True,icon='PASTEDOWN') 
-                             
-                row.enabled =  False
-                row = box.row()
-
-                #row = layout.row()
-                box=row.box()
+                
+                if scn.famille == 'NEW':
+                    sub.prop(scn, "newF")
                     
-                #row = layout.row()
                 row = box.row()
                 
-                if scn.hidec:
-                    row.label(text='output',icon='CONSOLE')
-                    row.operator("scene.xp",text="",emboss=False,icon='ZOOMIN') 
+                #asset setting----------------------------------
+                split = row.split(align=True)
+                col = split.column()
+                
+                if(scn.asset=='none'):
+                    col.label(text=" ASSET",icon='QUESTION')
+                else:
+                    col.label(text=" ASSET",icon='FILE_TICK')
+                #col.row(align=True)
+                sub = col.column(align=True)
+                sub.prop(scn, "asset",expand=False,text='')
+                if scn.asset == 'NEW':
+                  sub.prop(scn, "newA")
+                
+                row = box.row()
+                
+            #dpt setting----------------------------------
+            split = row.split(align=True)
+            col = split.column()
+
+            if(scn.dpt=='none'):
+                col.label(text=" DPT",icon='QUESTION')
+            else:
+                col.label(text=" DPT",icon='FILE_TICK')
+            #col.row(align=True)
+            sub = col.column(align=True)
+            sub.prop(scn, "dpt",expand=False,text='')
+     
+            row = box.row()               
+            
+            rows = 3
+            row.template_list("UL_items", "", scn, "custom", scn, "custom_index", rows=rows)
+            #row = box.row()
+            row = box.row()
+            row.alignment='CENTER'
+            row.scale_y=1.5
+            row.operator("scene.createf",text="NEW",emboss=True,icon='FILE') 
+            row.operator("scene.createf",text="OPEN",emboss=True,icon='NEWFOLDER')
+            row.operator("scene.createf",text="SAVE AS",emboss=True,icon='PASTEDOWN') 
+                         
+            row.enabled =  False
+            row = box.row()
+
+            #row = layout.row()
+            box=row.box()
+                
+            #row = layout.row()
+            row = box.row()
+            
+            if scn.hidec:
+                row.label(text='output',icon='CONSOLE')
+                row.operator("scene.xp",text="",emboss=False,icon='ZOOMIN') 
+               
+                
+            elif not scn.hidec:
+                row.label(text='output',icon='CONSOLE')
+                row.operator("scene.xp",text="",emboss=False,icon='ZOOMOUT') 
+                            
+                box2=box.row()
+                
+                #box2= box.box()
+                for i in range(len(command)):    
                    
-                    
-                elif not scn.hidec:
-                    row.label(text='output',icon='CONSOLE')
-                    row.operator("scene.xp",text="",emboss=False,icon='ZOOMOUT') 
-                                
+                    box2.label(text=">> "+command[i])
+                    box2.scale_y=0.3
                     box2=box.row()
                     
-                    #box2= box.box()
-                    for i in range(len(command)):    
-                       
-                        box2.label(text=">> "+command[i])
-                        box2.scale_y=0.3
-                        box2=box.row()
-                        
-                    box2.template_ID(context.texture_user, context.texture_user_property.identifier, new="texture.new")
+               
                     
 
 """=============================================
@@ -560,7 +582,7 @@ def register():
     bpy.utils.register_module(__name__)
     bpy.types.Scene.custom = CollectionProperty(type=CustomProp)
     bpy.types.Scene.custom_index = IntProperty()
-    bpy.utils.register_class(OBJECT_OT_custompath)
+    #bpy.utils.register_class(OBJECT_OT_custompath)
     '''bpy.utils.register_class(hideo)
     bpy.utils.register_class(hide)
     bpy.utils.register_class(XP)
