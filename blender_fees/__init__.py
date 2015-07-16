@@ -32,7 +32,7 @@ bl_info = {
 import bpy
 from bpy.props import *
 import sys
-sys.path.append('/home/armabon/u/lib/python3x')
+sys.path.append('/u/lib/python3x')
 import naming.Herakles as naming
 from bpy.props import IntProperty, CollectionProperty #, StringProperty 
 from bpy.types import Panel, UIList
@@ -54,26 +54,37 @@ ___________________________________________________________________"""
                 VAR INIT
 
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'''
+#Default vars (first case = params)
+path={}
+property = []#contain all props
+Items = []
+drives = (('Store',"Store directory",''),('test1_1',"test1_2",''),('test2_1',"test2_2",''),('',"",''))
 
-#Default vars
-drives = (('tzqt',"test",''),('tzqt',"test",''))
-
+#adding 
+property.append(drives)
 
 def initSceneProperties(scn):
+    
      bpy.types.Scene.FPath = StringProperty(
         name="",
         description="searching root",
         maxlen= 1024,
         subtype='DIR_PATH',
         default= "")
-     bpy.types.Scene.drives = EnumProperty(
-        name="Store",
-        description="Store directory",
-        items=(('toto', "toto", ""),
-               ('toto2', "toto2", ""),
-               ('', "", "")),
-        default='',
-        update=update_value(bpy.context,bpy.context,'drive'))
+        
+     
+     
+     bpy.types.Scene.drives = EnumProperty(name="none",description="none",items=(('')))
+     s = len(property)
+     
+     Items.append(('none',"none",""))
+             
+     for i in range(s):      
+        for line in range(1,len(property[i]),3):
+            Items.append((str(property[i][line][0]),str(property[i][line][1]),str(property[i][line][2])))         
+            print(Items)
+        UpdateEnum(bpy.types.Scene,tuple(Items),property[i][0][0],property[i][0][1],Items[0][0])    
+    
      bpy.types.Scene.roots = EnumProperty(
         name="Root",
         description="root",
@@ -176,11 +187,6 @@ def initSceneProperties(scn):
                ('NEW', "NEW", "")),
         default='none')  
            
-def update_value(self,context,type):
-    print('update drive')
-         
-    return None
-
 
 '''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -236,7 +242,7 @@ class OBJECT_OT_custompath(bpy.types.Operator):
     def execute(self, context):
         #set the string path fo the file here.
         #this is a variable created from the top to start it
-        bpy.context.scene.MyString = self.properties.filepath
+        bpy.context.scene.newF = self.properties.filepath
         
         
         print("*************SELECTED FILES ***********")
@@ -244,7 +250,8 @@ class OBJECT_OT_custompath(bpy.types.Operator):
             print(file.name)
         
         print("FILEPATH %s"%self.properties.filepath)#display the file name and current path    
-        bpy.context.scene.drives
+        Items.append((str(self.properties.filepath),str(self.properties.filepath),""))
+        UpdateEnum(bpy.types.Scene,Items,str(self.properties.filepath),str(self.properties.filepath),'none')
         return {'FINISHED'}
 
 
@@ -263,13 +270,13 @@ class OBJECT_OT_custompath(bpy.types.Operator):
 
 ---------------------------------------------------'''
 
-def UpdateEnum(Enum,Items,Name,Description,Default):
-    Enum = EnumProperty(
+def UpdateEnum(Enums,Itemss,Name,Description,Defaults):
+    print("update file list")
+    bpy.types.Scene.drives= EnumProperty(
         name=Name,
         description=Description,
-        items = Items,
-        default=Default)        
-
+        items=Itemss,
+        default=Defaults)        
 
 '''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
