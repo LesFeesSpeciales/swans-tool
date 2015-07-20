@@ -100,7 +100,8 @@ def initSceneProperties(scn):
                ('PROP', "PROP", ""),
                ('SET', "SET", ""),
                ('LOOKDEV', "LOOKDEV", "")),
-        default='none')  
+        default='none',
+        update = update_func(bpy.context,bpy.context,'Type'))  
      bpy.types.Scene.famille = EnumProperty(
         name="famille",
         description="/lib/type/famille",
@@ -110,7 +111,8 @@ def initSceneProperties(scn):
                ('f3', "f3", ""),
                ('f4', "f4", ""),
                ('none', "none", "")),
-        default='none') 
+        default='none',
+        update = update_func(bpy.context,bpy.context,'Family')) 
      bpy.types.Scene.asset = EnumProperty(
         name="asset",
         description="/lib/type/famille/asset",
@@ -120,7 +122,8 @@ def initSceneProperties(scn):
                ('a3', "a3", ""),
                ('a4', "a4", ""),
                ('NEW', "NEW", "")),
-        default='none') 
+        default='none',
+        update = update_func(bpy.context,bpy.context,'Asset')) 
      bpy.types.Scene.dpt = EnumProperty(
         name="dpt",
         description="/lib/type/famille/asset/dpt or /movie/seq/shot/dpt",
@@ -129,7 +132,8 @@ def initSceneProperties(scn):
                ('dpt2', "dpt2", ""),
                ('dpt3', "dpt3", ""),
                ('dpt4', "dpt4", "")),
-        default='none') 
+        default='none',
+        update = update_func(bpy.context,bpy.context,'Departement')) 
      bpy.types.Scene.newF = StringProperty(
         name="",
         subtype = 'FILE_NAME',
@@ -277,7 +281,17 @@ def UpdateEnum(Enums,Itemss,Name,Description,Defaults):
         description=Description,
         items=Itemss,
         default=Defaults)        
+        
+'''-----------------------------------------------
 
+             Update Naing path function    
+
+----------------------------------------------'''
+def update_func(self, context,ID):
+    print("my test function", ID)
+    path[ID]='test'
+    print(path[ID])
+    
 '''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
                 FILE CREATE OPERATOR
