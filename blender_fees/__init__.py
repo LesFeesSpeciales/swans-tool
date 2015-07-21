@@ -28,7 +28,7 @@ bl_info = {
     "wiki_url":"http://les-fees-speciales.coop/wiki/",
     "category":""
 }
-
+from pprint import pprint
 import bpy
 from bpy.props import *
 import sys
@@ -51,68 +51,93 @@ ___________________________________________________________________"""
 
 '''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-                VAR INIT
+                  VARS
 
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'''
 #Default vars (first case = params)
 path={}
 property = []#contain all props
 Items = []
-drives = (('Store',"Store directory",''),('test1_1',"test1_2",''),('test2_1',"test2_2",''),('',"",''))
+drives = (('Store',"Store directory",''),('/u/Project/',"/u/Project/",''),('test2_1',"test2_2",''),('',"",''))
+is_wild = 'none'
 
 #adding 
 property.append(drives)
 
+'''-----------------------------------------------
+
+             INTERFACE NAMING FUNC 
+
+----------------------------------------------'''
+def launch_create_naming():
+    #Generate naming Object
+    n = naming.StoreFolder.from_name(path['Store'])
+    #Allowing dico
+    c =n(**path)
+    
+    print(c.path())
+    command.append(c.path())
+    is_wild = c.is_wild()
+    print(is_wild)
+    
+def update_naming(self, context):
+    path.clear()
+    #print(bpy.context.scene.drives.split('/'))
+    path['Store']='/'+bpy.context.scene.drives.split('/')[1]
+    path['Project']=bpy.context.scene.drives.split('/')[2]
+    
+    if bpy.context.scene.roots == 'LIB':
+        path['Lib'] = 'LIB'
+        path['Family']=bpy.context.scene.famille
+        path['Asset']=bpy.context.scene.asset
+        path['Dept']=bpy.context.scene.dpt
+    elif bpy.context.scene.roots =='MOVIE':
+        path['Film'] = 'FILM'
+        path['Seq'] = bpy.context.scene.seq
+        path['Shot'] = bpy.context.scene.shot
+        path['Dept'] = bpy.context.scene.dpt
+    #pprint(path)
+    launch_create_naming()
+    return None
+
+
+       
 def initSceneProperties(scn):
     
-     bpy.types.Scene.FPath = StringProperty(
-        name="",
-        description="searching root",
-        maxlen= 1024,
-        subtype='DIR_PATH',
-        default= "")
-        
-     
-     
+     #PROJECT DIR----------------------------->
      bpy.types.Scene.drives = EnumProperty(name="none",description="none",items=(('')))
      s = len(property)
      
-     Items.append(('none',"none",""))
-             
+     Items.append(('none',"none",""))        
      for i in range(s):      
         for line in range(1,len(property[i]),3):
             Items.append((str(property[i][line][0]),str(property[i][line][1]),str(property[i][line][2])))         
             print(Items)
         UpdateEnum(bpy.types.Scene,tuple(Items),property[i][0][0],property[i][0][1],Items[0][0])    
-    
+         
+     #ROOT----------------------------->
      bpy.types.Scene.roots = EnumProperty(
         name="Root",
         description="root",
         items=(('LIB', "LIB", ""),
                ('MOVIE', "MOVIE", ""),
                ('', "", "")),
-        default='')
-     bpy.types.Scene.type = EnumProperty(
-        name="type",
-        description="/lib/type",
-        items=(('none', "none", ""),
-               ('CHAR', "CHAR", ""),
-               ('PROP', "PROP", ""),
-               ('SET', "SET", ""),
-               ('LOOKDEV', "LOOKDEV", "")),
-        default='none',
-        update = update_func(bpy.context,bpy.context,'Type'))  
+        default='',
+        update = update_naming)  
+        
+     #FAMILY----------------------------------->
      bpy.types.Scene.famille = EnumProperty(
         name="famille",
         description="/lib/type/famille",
         items=(('none', "none", ""),
-               ('f1', "f1", ""),
-               ('f2', "f2", ""),
-               ('f3', "f3", ""),
-               ('f4', "f4", ""),
+               ('Chars', "Chars", ""),
+               ('Props', "Props", ""),
+               ('Sets', "Sets", ""),
+               ('Lookdev', "Lookdev", ""),
                ('none', "none", "")),
         default='none',
-        update = update_func(bpy.context,bpy.context,'Family')) 
+        update = update_naming)
+     #ASSET------------------------------------>
      bpy.types.Scene.asset = EnumProperty(
         name="asset",
         description="/lib/type/famille/asset",
@@ -123,17 +148,48 @@ def initSceneProperties(scn):
                ('a4', "a4", ""),
                ('NEW', "NEW", "")),
         default='none',
-        update = update_func(bpy.context,bpy.context,'Asset')) 
+        update = update_naming)
+        
+     #DEPARTEMENT----------------------------->
      bpy.types.Scene.dpt = EnumProperty(
         name="dpt",
         description="/lib/type/famille/asset/dpt or /movie/seq/shot/dpt",
         items=(('none', "none", ""),
-               ('dpt1', "dpt1", ""),
-               ('dpt2', "dpt2", ""),
-               ('dpt3', "dpt3", ""),
-               ('dpt4', "dpt4", "")),
+               ('Mod', "Mod", ""),
+               ('Actor', "Actor", ""),
+               ('Anim', "Anim", ""),
+               ('Layout', "Layout", ""),
+               ('Lighting', "Lighting", ""),
+               ('Compo', "Compo", ""),
+               ('Matte', "Mat", ""),
+               ('Cam', "Cam", ""),
+               ('Vfx', "Vfxr", ""),
+               ('Shad', "Shad", "")),
         default='none',
-        update = update_func(bpy.context,bpy.context,'Departement')) 
+        update = update_naming) 
+      #SEQUENCE------------------------------->
+     bpy.types.Scene.seq = EnumProperty(
+        name="type",
+        description="/movie/seq",
+        items=(('none', "none", ""),
+               ('S_001', "S_001", ""),
+               ('S_002', "S_002", ""),
+               ('S_003', "S_003", ""),
+               ('NEW', "NEW", "")),
+        default='none',
+        update = update_naming)
+     #SHOT------------------------------------>
+     bpy.types.Scene.shot = EnumProperty(
+        name="type",
+        description="/movie/seq/shot",
+        items=(('none', "none", ""),
+               ('P_001', "P_001", ""),
+               ('P_002', "P_002", ""),
+               ('P_003', "P_003", ""),
+               ('NEW', "NEW", "")),
+        default='none',
+        update = update_naming) 
+     #Strings props---------------------------->
      bpy.types.Scene.newF = StringProperty(
         name="",
         subtype = 'FILE_NAME',
@@ -152,11 +208,7 @@ def initSceneProperties(scn):
         description="new asset",
         maxlen= 50,
         default= "")
-     bpy.types.Scene.command = StringProperty(
-        name="",
-        description="command",
-        maxlen= 500,
-        default= '      -initialisation')
+     #HIDING BOOLEANS------------------------->
      bpy.types.Scene.hidec = BoolProperty(
         name = "hidec", 
         default=False,
@@ -165,31 +217,7 @@ def initSceneProperties(scn):
         name = "hidec", 
         default=False,
         description = "hide console")
-     bpy.types.Scene.seq = EnumProperty(
-        name="type",
-        description="/movie/seq",
-        items=(('none', "none", ""),
-               ('S_001', "S_001", ""),
-               ('S_002', "S_002", ""),
-               ('S_003', "S_003", ""),
-               ('NEW', "NEW", "")),
-        default='none')
-     bpy.types.Scene.mode = EnumProperty(
-        name="mode",
-        description="file tool mode",
-        items=(('OPEN', "Open Mode", "Opening file mode",'FILE_FOLDER',1),
-               ('CREATE', "Create Mode", "Create file mode",'FILE',2),
-               ('CHECK', "Check Mode", "Checking file mode",'FILE_SCRIPT',3)),
-        default='OPEN')
-     bpy.types.Scene.shot = EnumProperty(
-        name="type",
-        description="/movie/seq/shot",
-        items=(('none', "none", ""),
-               ('P_001', "P_001", ""),
-               ('P_002', "P_002", ""),
-               ('P_003', "P_003", ""),
-               ('NEW', "NEW", "")),
-        default='none')  
+    
            
 
 '''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -282,16 +310,7 @@ def UpdateEnum(Enums,Itemss,Name,Description,Defaults):
         items=Itemss,
         default=Defaults)        
         
-'''-----------------------------------------------
 
-             Update Naing path function    
-
-----------------------------------------------'''
-def update_func(self, context,ID):
-    print("my test function", ID)
-    path[ID]='test'
-    print(path[ID])
-    
 '''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
                 FILE CREATE OPERATOR
@@ -466,38 +485,17 @@ class naming_panel(bpy.types.Panel):
                 box = row.box()
                 row = box.row()
                 
-                
+                #family setting-------------------------------------    
                 if(scn.type=='none'):
-                    row.label(text=" TYPE",icon='QUESTION')
+                    row.label(text=" FAMILY",icon='QUESTION')
                 else:
-                    row.label(text=" TYPE",icon='FILE_TICK')
+                    row.label(text=" FAMILY",icon='FILE_TICK')
                 row = box.row(align=True)     
                 
-                #type setting-------------------------------------    
-                row.prop(scn,"type",expand=True,icon_value=4)
+                
+                row.prop(scn,"famille",expand=True,icon_value=4)
                 row = box.row()
                 
-                
-                #familly setting----------------------------------
-                
-                #row = box.row()    
-                split = row.split(align=True)
-                
-                col = split.column()  
-                
-                if(scn.famille=='none'):
-                    col.label(text=" FAMILLE",icon='QUESTION')
-                else:
-                    col.label(text="FAMILLE",icon='FILE_TICK')
-                #col.row(align=True)
-                sub = col.column(align=True)
-                sub.prop(scn, "famille",expand=False,text='')
-                #row = box.row()
-                
-                if scn.famille == 'NEW':
-                    sub.prop(scn, "newF")
-                    
-                row = box.row()
                 
                 #asset setting----------------------------------
                 split = row.split(align=True)
@@ -535,11 +533,16 @@ class naming_panel(bpy.types.Panel):
             row = box.row()
             row.alignment='CENTER'
             row.scale_y=1.5
+            
             row.operator("scene.createf",text="NEW",emboss=True,icon='FILE') 
             row.operator("scene.createf",text="OPEN",emboss=True,icon='NEWFOLDER')
             row.operator("scene.createf",text="SAVE AS",emboss=True,icon='PASTEDOWN') 
-                         
-            row.enabled =  False
+            if is_wild == 'True':
+                print(is_wild)
+                row.enabled =  False
+            elif is_wild == 'False':
+                print('tata')
+                row.enabled =  True
             row = box.row()
 
             #row = layout.row()
