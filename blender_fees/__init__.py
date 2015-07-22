@@ -30,6 +30,7 @@ bl_info = {
 }
 from pprint import pprint
 import bpy
+import os.path
 from bpy.props import *
 import sys
 sys.path.append('/u/lib/python3x')
@@ -54,32 +55,114 @@ ___________________________________________________________________"""
                   VARS
 
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'''
-#Default vars (first case = params)
-path={}
-property = []#contain all props
+#-----GENERAL VARS-------
+command=['initializing...done']
+folders =[]
+property = []#contain all props in a near futur.....
 Items = []
+
+#-----NAMING VARS-------
+path={}
 drives = (('Store',"Store directory",''),('/u/Project/',"/u/Project/",''),('test2_1',"test2_2",''),('',"",''))
-is_wild = 'none'
+is_wild = 'True'
 
 #adding 
 property.append(drives)
 
 '''-----------------------------------------------
 
+             FILES FUNC 
+
+----------------------------------------------'''
+#...................................
+#         File                     #
+#                                  #
+#   Basic file class for           #
+#       purpose                    #
+#...................................
+class file:
+    def __init__(self):
+       self.name = None
+       self.type = None 
+       self.hide = False                       
+#...................................
+#         checking func            #
+#             to test              #
+#          the type of file        #
+#                                  #
+#...................................             
+def isfolder(name):
+    if name.find('.') == -1:
+        return True
+    else:
+        return False
+#...................................
+#         List directories         #
+#...................................               
+def listdir(root):
+    buffer = os.listdir(root)
+    for i in range(len(buffer)-1):
+        tmp = file()
+        if isfolder(buffer[i]):
+            tmp.type = 'D'
+        else:
+            tmp.type = 'F' 
+        tmp.hide = False  
+        tmp.name= buffer[i]   
+        folders.append(tmp)           
+#...................................
+#         List files               #
+#...................................
+def listFiles(dir, ext):
+    fileList = []
+
+    for file in os.listdir(dir):
+        if file[-len(ext):] == ext:
+            fileList.append(file)
+            
+    return fileList
+
+'''-----------------------------------------------
+
              INTERFACE NAMING FUNC 
 
 ----------------------------------------------'''
-def launch_create_naming():
+#...................................
+#         Create_naming            #
+#                                  #
+#   Create the basic naming        #
+#       object and use it          #
+#...................................
+def create_naming(self,context,op):
     #Generate naming Object
     n = naming.StoreFolder.from_name(path['Store'])
     #Allowing dico
     c =n(**path)
-    
+    dir = c.path()
     print(c.path())
     command.append(c.path())
-    is_wild = c.is_wild()
-    print(is_wild)
-    
+    bpy.context.scene.wild  = c.is_wild()        
+    if op == 'CREATE':
+        print("Create missing folders with naming...")
+        c.create()
+        print("done.")
+        
+    print("the way is wild : "+is_wild)
+    return c.path()
+
+def Update_ListFile(dir):
+    bpy.context.scene.custom.clear()
+    list = listFiles(bpy.types.Scene.newF,".blend")
+    print(list)
+    for i in range(len(list)):
+        bpy.context.scene.custom.add()
+        bpy.context.scene.custom[i].name = list[i]
+#...................................
+#         update_naming            #
+#                                  #
+#   update the basic naming        #
+#       object and use it          #
+#...................................
 def update_naming(self, context):
     path.clear()
     #print(bpy.context.scene.drives.split('/'))
@@ -93,17 +176,19 @@ def update_naming(self, context):
         path['Dept']=bpy.context.scene.dpt
     elif bpy.context.scene.roots =='MOVIE':
         path['Film'] = 'FILM'
-        path['Seq'] = bpy.context.scene.seq
+        path['Sequence'] = bpy.context.scene.seq
         path['Shot'] = bpy.context.scene.shot
         path['Dept'] = bpy.context.scene.dpt
     #pprint(path)
-    launch_create_naming()
+    
+    bpy.types.Scene.newF = create_naming(self,context,'')
+    Update_ListFile(bpy.types.Scene.newF)
+    
     return None
 
 
        
 def initSceneProperties(scn):
-    
      #PROJECT DIR----------------------------->
      bpy.types.Scene.drives = EnumProperty(name="none",description="none",items=(('')))
      s = len(property)
@@ -122,7 +207,7 @@ def initSceneProperties(scn):
         items=(('LIB', "LIB", ""),
                ('MOVIE', "MOVIE", ""),
                ('', "", "")),
-        default='',
+        default='LIB',
         update = update_naming)  
         
      #FAMILY----------------------------------->
@@ -213,6 +298,10 @@ def initSceneProperties(scn):
         name = "hidec", 
         default=False,
         description = "hide console")
+     bpy.types.Scene.wild = BoolProperty(
+        name = "is_wild", 
+        default=True,
+        description = "is the path valid")
      bpy.types.Scene.hidecreator = BoolProperty(
         name = "hidec", 
         default=False,
@@ -244,11 +333,28 @@ class UL_items(UIList):
 class CustomProp(bpy.types.PropertyGroup):
     name = StringProperty() 
     id = IntProperty()
+'''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+                DIALOG OPERATOR
 
-command=['test','test2','test2','test2']
-folders =[]
-
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>''' 
+class DialogOperator(bpy.types.Operator):
+    bl_idname = "object.dialog_operator"
+    bl_label = "Pose already exist, overwrite or change the pose name"
+    
+    overwrite = BoolProperty(name="Overwrite")
+    
+    def execute(self, context):
+        scn = context.scene
+        if self.overwrite:
+            print("overwrite")
+            file_name = bpy.types.Scene.newF.split("/")
+            p = bpy.types.Scene.newF+"/"+file_name[len(file_name)-1]+".blend"
+            bpy.ops.wm.save_as_mainfile(filepath=p) 
+        return {'FINISHED'}
+    
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self)
 '''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
                 OPEN DIR OPERATOR
@@ -313,16 +419,36 @@ def UpdateEnum(Enums,Itemss,Name,Description,Defaults):
 
 '''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-                FILE CREATE OPERATOR
+                FILE OPERATOR
 
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>''' 
-class createF(bpy.types.Operator):
-    bl_idname = "scene.createf"
-    bl_label = "createf"
+class file_op(bpy.types.Operator):
+    bl_idname = "scene.file_op"
+    bl_label = "file_op"
     
+    action = bpy.props.StringProperty() # defining the property
     def execute(self, context):
-        print("Hello")
-        
+        if self.action == "NEW":
+            print("create directories")
+            create_naming(bpy.context,bpy.context,'CREATE')
+            print("creating new file"+ bpy.types.Scene.newF)
+            
+        elif self.action == "OPEN":
+            print("opening file")
+            file_name =  bpy.context.scene.custom[bpy.context.scene.custom_index].name
+            p = bpy.types.Scene.newF+"/"+file_name
+            bpy.ops.wm.open_mainfile(filepath = p)
+            
+        elif self.action == "SAVE_AS":
+            create_naming(bpy.context,bpy.context,'CREATE')
+            file_name = bpy.types.Scene.newF.split("/")
+            p = bpy.types.Scene.newF+"/"+file_name[len(file_name)-1]+".blend"
+            if os.path.isfile(p):
+                command.append("File already exist")
+                bpy.ops.object.dialog_operator('INVOKE_DEFAULT') #calls the popup
+            else:
+                print("saving file to :"+str(p))  
+                bpy.ops.wm.save_as_mainfile(filepath=p)    
         return {"FINISHED"}
 
 '''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -335,7 +461,7 @@ class Help(bpy.types.Operator):
     bl_label = "help"
     
     def execute(self, context):
-        bpy.ops.wm.url_open(url="http://les-fees-speciales.coop/wiki/")
+        bpy.ops.wm.url_open(url="http://les-fees-speciales.coop/wki/")
         return {"FINISHED"}
     
 '''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -486,7 +612,7 @@ class naming_panel(bpy.types.Panel):
                 row = box.row()
                 
                 #family setting-------------------------------------    
-                if(scn.type=='none'):
+                if(scn.famille=='none'):
                     row.label(text=" FAMILY",icon='QUESTION')
                 else:
                     row.label(text=" FAMILY",icon='FILE_TICK')
@@ -521,38 +647,40 @@ class naming_panel(bpy.types.Panel):
                 col.label(text=" DPT",icon='QUESTION')
             else:
                 col.label(text=" DPT",icon='FILE_TICK')
-            #col.row(align=True)
+            
             sub = col.column(align=True)
             sub.prop(scn, "dpt",expand=False,text='')
      
-            row = box.row()               
-            
+            row = box.row()        
+                   
+            #File list---------------------------------------
             rows = 3
             row.template_list("UL_items", "", scn, "custom", scn, "custom_index", rows=rows)
             #row = box.row()
             row = box.row()
+            
+            #Operator OPEN/NEW/SAVE AS--------------------------
             row.alignment='CENTER'
             row.scale_y=1.5
             
-            row.operator("scene.createf",text="NEW",emboss=True,icon='FILE') 
-            row.operator("scene.createf",text="OPEN",emboss=True,icon='NEWFOLDER')
-            row.operator("scene.createf",text="SAVE AS",emboss=True,icon='PASTEDOWN') 
-            if is_wild == 'True':
-                print(is_wild)
+            row.operator("scene.file_op",text="NEW",emboss=True,icon='FILE').action = "NEW" 
+            row.operator("scene.file_op",text="OPEN",emboss=True,icon='NEWFOLDER').action = "OPEN"
+            row.operator("scene.file_op",text="SAVE AS",emboss=True,icon='PASTEDOWN').action = "SAVE_AS" 
+            
+            if scn.wild:
                 row.enabled =  False
-            elif is_wild == 'False':
-                print('tata')
+            else:
                 row.enabled =  True
+                
             row = box.row()
-
-            #row = layout.row()
             box=row.box()
                 
-            #row = layout.row()
+            #console-------------------------------------------------------
             row = box.row()
             
             if scn.hidec:
                 row.label(text='output',icon='CONSOLE')
+                create_naming(self,context,"CREATE")
                 row.operator("scene.xp",text="",emboss=False,icon='ZOOMIN') 
                
                 
@@ -568,39 +696,6 @@ class naming_panel(bpy.types.Panel):
                     box2.label(text=">> "+command[i])
                     box2.scale_y=0.3
                     box2=box.row()
-                    
-               
-                    
-
-"""=============================================
-        
-            GENERAL FUNC
-        
-============================================="""
-class file:
-    def __init__(self):
-       self.name = None
-       self.type = None 
-       self.hide = False                       
-             
-def isfolder(name):
-    if name.find('.') == -1:
-        return True
-    else:
-        return False
-               
-def listdir(root):
-    buffer = os.listdir(root)
-    for i in range(len(buffer)-1):
-        tmp = file()
-        if isfolder(buffer[i]):
-            tmp.type = 'D'
-        else:
-            tmp.type = 'F' 
-        tmp.hide = False  
-        tmp.name= buffer[i]   
-        folders.append(tmp)           
-
       
 def register():
     bpy.utils.register_module(__name__)
@@ -611,7 +706,7 @@ def register():
     bpy.utils.register_class(hide)
     bpy.utils.register_class(XP)
     bpy.utils.register_class(Help)
-    bpy.utils.register_class(createF)
+    bpy.utils.register_class(file_op)
     bpy.utils.register_class(naming_panel)
     '''
 def unregister():
@@ -622,7 +717,7 @@ def unregister():
     bpy.utils.unregister_class(hide)
     bpy.utils.unregister_class(XP)
     bpy.utils.unregister_class(Help)
-    bpy.utils.unregister_class(createF)
+    bpy.utils.unregister_class(file_op)
     bpy.utils.unregister_class(naming_panel)
     bpy.utils.unregister_class(OBJECT_OT_custompath)
     
