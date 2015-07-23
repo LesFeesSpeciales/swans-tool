@@ -1,3 +1,13 @@
+bl_info = {
+    "name": "Les Fees Speciales",
+    "author":"Les Fees Speciales",
+    "version":(1,0),
+    "location": "Tools ",
+    "description":"File management tool for production",
+    "wiki_url":"http://les-fees-speciales.coop/wiki/",
+    "category":"User"
+}
+
 '''
 Copyright (C) 2015 LES FEES SPECIALES
 
@@ -17,17 +27,6 @@ Created by LES FEES SPECIALES
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-bl_info = {
-    "name": "Les Fees Speciales",
-    "author":"Les Fees Speciales",
-    "version":(0,0),
-    "blender":(2,75,0),
-    "location": "View3D ",
-    "description":"File management tool for production",
-    "warning":"unstable",
-    "wiki_url":"http://les-fees-speciales.coop/wiki/",
-    "category":""
-}
 from pprint import pprint
 import bpy
 import os.path
@@ -37,7 +36,7 @@ sys.path.append('/u/lib/python3x')
 import naming.Herakles as naming
 from bpy.props import IntProperty, CollectionProperty #, StringProperty 
 from bpy.types import Panel, UIList
-
+import shutil
 
 """_______________________HELP SECTION________________________________
 
@@ -188,7 +187,7 @@ def update_naming(self, context):
 
 
        
-def initSceneProperties(scn):
+def initSceneProperties():
      #PROJECT DIR----------------------------->
      bpy.types.Scene.drives = EnumProperty(name="none",description="none",items=(('')))
      s = len(property)
@@ -389,7 +388,7 @@ class OBJECT_OT_custompath(bpy.types.Operator):
         
         print("FILEPATH %s"%self.properties.filepath)#display the file name and current path    
         Items.append((str(self.properties.filepath),str(self.properties.filepath),""))
-        UpdateEnum(bpy.types.Scene,Items,str(self.properties.filepath),str(self.properties.filepath),'none')
+        UpdateEnum(bpy.types.Scene,Items,str(self.properties.filepath),str(self.properties.filepath),str(self.properties.filepath))
         return {'FINISHED'}
 
 
@@ -416,7 +415,6 @@ def UpdateEnum(Enums,Itemss,Name,Description,Defaults):
         items=Itemss,
         default=Defaults)        
         
-
 '''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
                 FILE OPERATOR
@@ -431,8 +429,15 @@ class file_op(bpy.types.Operator):
         if self.action == "NEW":
             print("create directories")
             create_naming(bpy.context,bpy.context,'CREATE')
-            print("creating new file"+ bpy.types.Scene.newF)
-            
+            file_name = bpy.types.Scene.newF.split("/")
+            p = bpy.types.Scene.newF+"/"+file_name[len(file_name)-1]+".blend"
+            if os.path.isfile(p):
+                command.append("File already exist")
+                bpy.ops.object.dialog_operator('INVOKE_DEFAULT') #calls the popup
+            else:
+                print("saving file to :"+str(p))  
+                shutil.copyfile('/u/tools/blender_fee/base.blend',p)  
+                    
         elif self.action == "OPEN":
             print("opening file")
             file_name =  bpy.context.scene.custom[bpy.context.scene.custom_index].name
@@ -664,8 +669,9 @@ class naming_panel(bpy.types.Panel):
             row.scale_y=1.5
             
             row.operator("scene.file_op",text="NEW",emboss=True,icon='FILE').action = "NEW" 
-            row.operator("scene.file_op",text="OPEN",emboss=True,icon='NEWFOLDER').action = "OPEN"
             row.operator("scene.file_op",text="SAVE AS",emboss=True,icon='PASTEDOWN').action = "SAVE_AS" 
+            row.operator("scene.file_op",text="OPEN",emboss=True,icon='NEWFOLDER').action = "OPEN"
+            
             
             if scn.wild:
                 row.enabled =  False
@@ -680,7 +686,6 @@ class naming_panel(bpy.types.Panel):
             
             if scn.hidec:
                 row.label(text='output',icon='CONSOLE')
-                create_naming(self,context,"CREATE")
                 row.operator("scene.xp",text="",emboss=False,icon='ZOOMIN') 
                
                 
@@ -698,6 +703,7 @@ class naming_panel(bpy.types.Panel):
                     box2=box.row()
       
 def register():
+    initSceneProperties() 
     bpy.utils.register_module(__name__)
     bpy.types.Scene.custom = CollectionProperty(type=CustomProp)
     bpy.types.Scene.custom_index = IntProperty()
@@ -709,18 +715,17 @@ def register():
     bpy.utils.register_class(file_op)
     bpy.utils.register_class(naming_panel)
     '''
-def unregister():
+def unregister():   
     bpy.utils.unregister_module(__name__)
     del bpy.types.Scene.custom
     del bpy.types.Scene.custom_index
-    bpy.utils.unregister_class(hideo)
+    '''bpy.utils.unregister_class(hideo)
     bpy.utils.unregister_class(hide)
     bpy.utils.unregister_class(XP)
     bpy.utils.unregister_class(Help)
     bpy.utils.unregister_class(file_op)
     bpy.utils.unregister_class(naming_panel)
-    bpy.utils.unregister_class(OBJECT_OT_custompath)
-    
+    bpy.utils.unregister_class(OBJECT_OT_custompath)'''
+
 if __name__ == "__main__":
-    initSceneProperties(bpy.context.scene)  
     register()
