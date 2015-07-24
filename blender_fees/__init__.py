@@ -707,25 +707,11 @@ def register():
     bpy.utils.register_module(__name__)
     bpy.types.Scene.custom = CollectionProperty(type=CustomProp)
     bpy.types.Scene.custom_index = IntProperty()
-    #bpy.utils.register_class(OBJECT_OT_custompath)
-    '''bpy.utils.register_class(hideo)
-    bpy.utils.register_class(hide)
-    bpy.utils.register_class(XP)
-    bpy.utils.register_class(Help)
-    bpy.utils.register_class(file_op)
-    bpy.utils.register_class(naming_panel)
-    '''
+
 def unregister():   
     bpy.utils.unregister_module(__name__)
     del bpy.types.Scene.custom
     del bpy.types.Scene.custom_index
-    '''bpy.utils.unregister_class(hideo)
-    bpy.utils.unregister_class(hide)
-    bpy.utils.unregister_class(XP)
-    bpy.utils.unregister_class(Help)
-    bpy.utils.unregister_class(file_op)
-    bpy.utils.unregister_class(naming_panel)
-    bpy.utils.unregister_class(OBJECT_OT_custompath)'''
 
 if __name__ == "__main__":
     register()
