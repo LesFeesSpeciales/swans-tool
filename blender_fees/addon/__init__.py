@@ -28,11 +28,12 @@ Created by LES FEES SPECIALES
 '''
 
 from pprint import pprint #Lib to print dictionnaries
+import addon_utils #utils to find addons path
 import bpy                #Blender Lib
 import os.path            #Files functions of os lib
 from bpy.props import *   #Blender properties lib
 import sys                #System Libraries
-sys.path.append('/u/lib/python3x') #Appending naming libs
+sys.path.append(addon_utils.paths()[len(addon_utils.paths())-1]+'/addon/python3x') #Appending naming libs
 import naming.Herakles as naming   #Import naming 
 from bpy.props import IntProperty, CollectionProperty #, StringProperty 
 from bpy.types import Panel, UIList #Some UI Blender Libs
@@ -300,6 +301,7 @@ class DialogOperator(bpy.types.Operator):
         scn = context.scene
         print('tesinbsdnfsd')
         if self.overwrite:
+            
             print("overwrite2")
             file_name = bpy.types.Scene.newF.split("/")
             file = file_name[len(file_name)-1]
@@ -320,7 +322,8 @@ class DialogOperator(bpy.types.Operator):
             print(file)
             p = bpy.types.Scene.newF+"/"+file+".blend"
             if os.path.isfile(p):
-                print("FILE ALREADY EXIST !")
+                print("FILE ALREADY EXIST ERASE IT")
+                bpy.ops.wm.save_as_mainfile(filepath=p) 
             else:
                 bpy.ops.wm.save_as_mainfile(filepath=p) 
                 
@@ -349,7 +352,7 @@ class file_op(bpy.types.Operator):
             file_name = bpy.types.Scene.newF.split("/")
             p = bpy.types.Scene.newF+"/"+file_name[len(file_name)-1]+"_0.blend"
             print("saving file to :"+str(p))  
-            shutil.copyfile('/u/tools/blender_fees/base.blend',p) 
+            shutil.copyfile(addon_utils.paths()[len(addon_utils.paths())-1]+'/addon/base.blend',p) 
             bpy.ops.wm.open_mainfile(filepath = p)
 #            if os.path.isfile(p):
 #                command.append("File already exist")
