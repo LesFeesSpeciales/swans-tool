@@ -122,9 +122,14 @@ def Update_ListFile(dir):
 #...................................
 def update_naming(self, context):
     path.clear()
-    #print(bpy.context.scene.drives.split('/'))
-    path['Store']='/'+bpy.context.scene.drives.split('/')[1]
-    path['Project']=bpy.context.scene.drives.split('/')[2]
+    print(len(bpy.context.scene.drives.split('/')))
+    
+    if sys.platform == 'win32':
+        path['Store']='/'+bpy.context.scene.drives.split('\\')[1]
+        path['Project']=bpy.context.scene.drives.split('\\')[2]  
+    else:
+        path['Store']='/'+bpy.context.scene.drives.split('/')[1]
+        path['Project']=bpy.context.scene.drives.split('/')[2]        
     
     if bpy.context.scene.roots == 'LIB':
         path['Lib'] = 'LIB'
