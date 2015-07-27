@@ -129,7 +129,7 @@ def update_naming(self, context):
     if bpy.context.scene.roots == 'LIB':
         path['Lib'] = 'LIB'
         path['Family']=bpy.context.scene.famille
-        if bpy.context.scene.asset == 'NEW':
+        if bpy.context.scene.asset == 'other':
             path['Asset']=bpy.context.scene.newA
         else:
             path['Asset']=bpy.context.scene.asset
@@ -173,8 +173,7 @@ def initSceneProperties():
      bpy.types.Scene.famille = EnumProperty(
         name="famille",
         description="/lib/type/famille",
-        items=(('none', "none", ""),
-               ('Chars', "Chars", ""),
+        items=(('Chars', "Chars", ""),
                ('Props', "Props", ""),
                ('Sets', "Sets", ""),
                ('Lookdev', "Lookdev", ""),
@@ -300,13 +299,14 @@ class file_op(bpy.types.Operator):
             create_naming(bpy.context,bpy.context,'CREATE')
             file_name = bpy.types.Scene.newF.split("/")
             p = bpy.types.Scene.newF+"/"+file_name[len(file_name)-1]+".blend"
-            if os.path.isfile(p):
-                command.append("File already exist")
-                bpy.ops.object.dialog_operator('INVOKE_DEFAULT') #calls the popup
-            else:
-                print("saving file to :"+str(p))  
-                shutil.copyfile('/u/tools/blender_fees/base.blend',p) 
-                bpy.ops.wm.open_mainfile(filepath = p)
+            print("saving file to :"+str(p))  
+            shutil.copyfile('/u/tools/blender_fees/base.blend',p) 
+            bpy.ops.wm.open_mainfile(filepath = p)
+#            if os.path.isfile(p):
+#                command.append("File already exist")
+#                bpy.ops.object.dialog_operator('INVOKE_DEFAULT') #calls the popup
+#            else:
+                
                 
         #OPENING FILES----------->            
         elif self.action == "OPEN":
