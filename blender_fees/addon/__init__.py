@@ -285,7 +285,51 @@ def initSceneProperties():
         name = "hidec", 
         default=False,
         description = "hide console")
+'''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+                DIALOG OPERATOR
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>''' 
+class DialogOperator(bpy.types.Operator):
+    bl_idname = "object.dialog_operator"
+    bl_label = "Pose already exist, overwrite or change the pose name"
+    
+    overwrite = BoolProperty(name="Overwrite")
+    
+    def execute(self, context):
+        scn = context.scene
+        print('tesinbsdnfsd')
+        if self.overwrite:
+            print("overwrite2")
+            file_name = bpy.types.Scene.newF.split("/")
+            file = file_name[len(file_name)-1]
+            print(file)
+            t = bpy.context.scene.custom[bpy.context.scene.custom_index].name.split('_')
+            print("t:"+str(t))
+            name = ""
+            for i in range(0,len(t)-1):
+                name = name + t[i] +'_'
+                
+            version = t[len(t)-1].split('.')[0]
+            print(version)
+            version = int(version)
+            print(version)
+            version = version + 1
+            print(version)
+            file = name + str(version)
+            print(file)
+            p = bpy.types.Scene.newF+"/"+file+".blend"
+            if os.path.isfile(p):
+                print("FILE ALREADY EXIST !")
+            else:
+                bpy.ops.wm.save_as_mainfile(filepath=p) 
+                
+            Update_ListFile(bpy.types.Scene.newF)
+        return {'FINISHED'}
+    
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self)
+    
 '''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
                 FILE OPERATOR
@@ -303,7 +347,7 @@ class file_op(bpy.types.Operator):
             print("create directories")
             create_naming(bpy.context,bpy.context,'CREATE')
             file_name = bpy.types.Scene.newF.split("/")
-            p = bpy.types.Scene.newF+"/"+file_name[len(file_name)-1]+".blend"
+            p = bpy.types.Scene.newF+"/"+file_name[len(file_name)-1]+"_0.blend"
             print("saving file to :"+str(p))  
             shutil.copyfile('/u/tools/blender_fees/base.blend',p) 
             bpy.ops.wm.open_mainfile(filepath = p)
@@ -324,7 +368,7 @@ class file_op(bpy.types.Operator):
         elif self.action == "SAVE_AS":
             create_naming(bpy.context,bpy.context,'CREATE')
             file_name = bpy.types.Scene.newF.split("/")
-            p = bpy.types.Scene.newF+"/"+file_name[len(file_name)-1]+".blend"
+            p = bpy.types.Scene.newF+"/"+file_name[len(file_name)-1]+"_0.blend"
             if os.path.isfile(p):
                 command.append("File already exist")
                 bpy.ops.object.dialog_operator('INVOKE_DEFAULT') #calls the popup
@@ -334,6 +378,7 @@ class file_op(bpy.types.Operator):
                 
             Update_ListFile(bpy.types.Scene.newF)
         return {"FINISHED"}
+    
 '''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
                 OPEN DIR OPERATOR
@@ -342,13 +387,11 @@ class file_op(bpy.types.Operator):
 class OBJECT_OT_custompath(bpy.types.Operator):
     bl_idname = "object.custom_path"
     bl_label = "open"
-    __doc__ = ""
-    
+    __doc__ = ""   
     
     filename_ext = ".txt"
     filter_glob = StringProperty(default="*.txt", options={'HIDDEN'})    
         
-    
     #this can be look into the one of the export or import python file.
     #need to set a path so so we can get the file name and path
     filepath = StringProperty(name="File Path", description="Filepath used for importing txt files", maxlen= 1024, default= "")
@@ -359,8 +402,7 @@ class OBJECT_OT_custompath(bpy.types.Operator):
     def execute(self, context):
         #set the string path fo the file here.
         #this is a variable created from the top to start it
-        bpy.context.scene.newF = self.properties.filepath
-        
+        bpy.context.scene.newF = self.properties.filepath     
         
         print("*************SELECTED FILES ***********")
         for file in self.files:
@@ -370,7 +412,6 @@ class OBJECT_OT_custompath(bpy.types.Operator):
         Items.append((str(self.properties.filepath),str(self.properties.filepath),""))
         UpdateEnum(bpy.types.Scene,Items,str(self.properties.filepath),str(self.properties.filepath),str(self.properties.filepath))
         return {'FINISHED'}
-
 
     def draw(self, context):
         self.layout.operator('file.select_all_toggle')        
@@ -395,7 +436,7 @@ class UL_items(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         split = layout.split(0.6)
         split.prop(item, "name", text="", emboss=False, translate=False, icon='FILE')
-        split.label("Version: %d" % (index))
+       
 
     def invoke(self, context, event):
         pass   
