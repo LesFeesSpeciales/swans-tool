@@ -20,31 +20,7 @@ Created by LES FEES SPECIALES
 
 import bpy
 from bpy.props import *
-'''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-                DIALOG OPERATOR
-
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>''' 
-class DialogOperator(bpy.types.Operator):
-    bl_idname = "object.dialog_operator"
-    bl_label = "Pose already exist, overwrite or change the pose name"
-    
-    overwrite = BoolProperty(name="Overwrite")
-    
-    def execute(self, context):
-        scn = context.scene
-        if self.overwrite:
-            print("overwrite")
-            file_name = bpy.types.Scene.newF.split("/")
-            p = bpy.types.Scene.newF+"/"+file_name[len(file_name)-1]+".blend"
-            bpy.ops.wm.save_as_mainfile(filepath=p) 
-        return {'FINISHED'}
-    
-    def invoke(self, context, event):
-        return context.window_manager.invoke_props_dialog(self)
-    
-
-  
+ 
 
 
 '''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
