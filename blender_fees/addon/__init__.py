@@ -353,7 +353,14 @@ class file_op(bpy.types.Operator):
             file_name = bpy.types.Scene.newF.split("/")
             p = bpy.types.Scene.newF+"/"+file_name[len(file_name)-1]+"_0.blend"
             print("saving file to :"+str(p))  
-            shutil.copyfile(addon_utils.paths()[len(addon_utils.paths())-1]+'/addon/base.blend',p) 
+            for x in range(0,len(addon_utils.paths())):
+                print(addon_utils.paths()[x]+'/addon/base.blend')
+                if os.path.isfile(addon_utils.paths()[x]+'/addon/base.blend'):
+                    shutil.copyfile(addon_utils.paths()[x]+'/addon/base.blend',p) 
+                    print("new file copied")
+                    break
+                else:
+                    print("copy error")
             bpy.ops.wm.open_mainfile(filepath = p)
 #            if os.path.isfile(p):
 #                command.append("File already exist")
