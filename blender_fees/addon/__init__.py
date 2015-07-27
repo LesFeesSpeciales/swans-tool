@@ -33,7 +33,8 @@ import bpy                #Blender Lib
 import os.path            #Files functions of os lib
 from bpy.props import *   #Blender properties lib
 import sys                #System Libraries
-sys.path.append(addon_utils.paths()[len(addon_utils.paths())-1]+'/addon/python3x') #Appending naming libs
+for x in range(len(addon_utils.paths())-1):
+    sys.path.append(addon_utils.paths()[x]+'/addon/python3x') #Appending naming libs
 import naming.Herakles as naming   #Import naming 
 from bpy.props import IntProperty, CollectionProperty #, StringProperty 
 from bpy.types import Panel, UIList #Some UI Blender Libs
