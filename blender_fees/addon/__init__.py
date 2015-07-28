@@ -33,8 +33,10 @@ import bpy                #Blender Lib
 import os.path            #Files functions of os lib
 from bpy.props import *   #Blender properties lib
 import sys                #System Libraries
-for x in range(len(addon_utils.paths())-1):
-    sys.path.append(addon_utils.paths()[x]+'/addon/python3x') #Appending naming libs
+
+for x in range(len(addon_utils.paths())):
+    appending = sys.path.append(addon_utils.paths()[x]+'/addon/python3x') #Appending naming libs
+    print(appending)
 import naming.Herakles as naming   #Import naming 
 from bpy.props import IntProperty, CollectionProperty #, StringProperty 
 from bpy.types import Panel, UIList #Some UI Blender Libs
@@ -124,14 +126,22 @@ def Update_ListFile(dir):
 #...................................
 def update_naming(self, context):
     path.clear()
-    print(len(bpy.context.scene.drives.split('/')))
-    
+    n=''
+    print(n)
+    dest=""
     if sys.platform == 'win32':
-        path['Store']='/'+bpy.context.scene.drives.split('\\')[1]
-        path['Project']=bpy.context.scene.drives.split('\\')[2]  
+        dest = bpy.context.scene.drives.split('/')
     else:
-        path['Store']='/'+bpy.context.scene.drives.split('/')[1]
-        path['Project']=bpy.context.scene.drives.split('/')[2]        
+        dest = bpy.context.scene.drives.split('/')
+        
+    for i in range(len(dest)-2):
+        n = n + dest[i]+'/'
+            
+    path['Store']='/'+n
+    path['Project']=dest[len(dest)-2]    
+    
+    print("Stor:"+n)
+    print("Project:"+dest[len(dest)-2])  
     
     if bpy.context.scene.roots == 'LIB':
         path['Lib'] = 'LIB'
@@ -684,6 +694,19 @@ def unregister():
     bpy.utils.unregister_module(__name__)
     del bpy.types.Scene.custom
     del bpy.types.Scene.custom_index
+    del bpy.types.Scene.roots
+    del bpy.types.Scene.famille
+    del bpy.types.Scene.asset
+    del bpy.types.Scene.drives
+    del bpy.types.Scene.dpt
+    del bpy.types.Scene.seq
+    del bpy.types.Scene.shot
+    del bpy.types.Scene.newF
+    del bpy.types.Scene.newA
+    del bpy.types.Scene.newD
+    del bpy.types.Scene.hidec
+    del bpy.types.Scene.wild
+    del bpy.types.Scene.hidecreator
 
 if __name__ == "__main__":
     register()
