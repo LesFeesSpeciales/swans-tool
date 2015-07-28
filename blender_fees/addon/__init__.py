@@ -127,21 +127,23 @@ def Update_ListFile(dir):
 def update_naming(self, context):
     path.clear()
     n=''
-    print(n)
     dest=""
     if sys.platform == 'win32':
-        dest = bpy.context.scene.drives.split('/')
+        dest = bpy.context.scene.drives.split('\\')
     else:
         dest = bpy.context.scene.drives.split('/')
         
     for i in range(len(dest)-2):
         n = n + dest[i]+'/'
-            
-    path['Store']='/'+n
-    path['Project']=dest[len(dest)-2]    
     
-    print("Stor:"+n)
-    print("Project:"+dest[len(dest)-2])  
+    if sys.platform != 'win32':   
+        path['Store']='/'+n
+    else:
+        path['Store']=n
+    path['Project']=dest[len(dest)-2]
+        
+    print("project:"+dest[len(dest)-2] )
+    print("store : "+n)
     
     if bpy.context.scene.roots == 'LIB':
         path['Lib'] = 'LIB'
