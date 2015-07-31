@@ -234,17 +234,17 @@ def initSceneProperties():
         name="type",
         description="/movie/seq",
         items=(('none', "none", ""),
-               ('S_001', "S_001", ""),
-               ('S_002', "S_002", ""),
-               ('S_004', "S_004", ""),
-               ('S_005', "S_005", ""),
-               ('S_006', "S_006", ""),
-               ('S_007', "S_007", ""),
-               ('S_008', "S_008", ""),
-               ('S_009', "S_009", ""),
-               ('S_010', "S_010", ""),
-               ('S_011', "S_011", ""),
-               ('S_012', "S_012", "")),
+               ('S001', "S001", ""),
+               ('S002', "S002", ""),
+               ('S004', "S004", ""),
+               ('S005', "S005", ""),
+               ('S006', "S006", ""),
+               ('S007', "S007", ""),
+               ('S008', "S008", ""),
+               ('S009', "S009", ""),
+               ('S010', "S010", ""),
+               ('S011', "S011", ""),
+               ('S012', "S012", "")),
         default='none',
         update = update_naming)
      #SHOT------------------------------------>
@@ -252,18 +252,18 @@ def initSceneProperties():
         name="type",
         description="/movie/seq/shot",
         items=(('none', "none", ""),
-               ('P_001', "P_001", ""),
-               ('P_002', "P_002", ""),
-               ('P_003', "P_003", ""),
-               ('P_004', "P_004", ""),
-               ('P_005', "P_005", ""),
-               ('P_006', "P_006", ""),
-               ('P_007', "P_007", ""),
-               ('P_008', "P_008", ""),
-               ('P_009', "P_009", ""),
-               ('P_010', "P_010", ""),
-               ('P_011', "P_011", ""),
-               ('P_012', "P_012", "")),
+               ('P001', "P001", ""),
+               ('P002', "P002", ""),
+               ('P003', "P003", ""),
+               ('P004', "P004", ""),
+               ('P005', "P005", ""),
+               ('P006', "P006", ""),
+               ('P007', "P007", ""),
+               ('P008', "P008", ""),
+               ('P009', "P009", ""),
+               ('P010', "P010", ""),
+               ('P011', "P011", ""),
+               ('P012', "P012", "")),
         default='none',
         update = update_naming) 
      #Strings props---------------------------->
@@ -306,9 +306,9 @@ def initSceneProperties():
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>''' 
 class DialogOperator(bpy.types.Operator):
     bl_idname = "object.dialog_operator"
-    bl_label = "Pose already exist, overwrite or change the pose name"
+    bl_label = "File already exist, overwrite or change version"
     
-    overwrite = BoolProperty(name="Overwrite")
+    overwrite = BoolProperty(name="Increase Version")
     
     def execute(self, context):
         scn = context.scene
@@ -336,11 +336,12 @@ class DialogOperator(bpy.types.Operator):
             p = bpy.types.Scene.newF+"/"+file+".blend"
             if os.path.isfile(p):
                 print("FILE ALREADY EXIST ERASE IT")
-                bpy.ops.wm.save_as_mainfile(filepath=p) 
             else:
                 bpy.ops.wm.save_as_mainfile(filepath=p) 
-                
-            Update_ListFile(bpy.types.Scene.newF)
+        else:
+            p = bpy.types.Scene.newF+"/"+bpy.context.scene.custom[bpy.context.scene.custom_index].name
+            bpy.ops.wm.save_as_mainfile(filepath=p) 
+        Update_ListFile(bpy.types.Scene.newF)   
         return {'FINISHED'}
     
     def invoke(self, context, event):
