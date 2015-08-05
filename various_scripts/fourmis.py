@@ -305,24 +305,15 @@ def register():
     bpy.types.Scene.ant_number = bpy.props.IntProperty(name='Number Of Ants', description='Number Of Ants', min=1, soft_max=1000, default = 100)
     bpy.types.Scene.ant_start_frame = bpy.props.IntProperty(name='Start Frame', description='Start Frame', min=0, soft_max=1000, default = 1)
     bpy.types.Scene.ant_end_frame = bpy.props.IntProperty(name='End Frame', description='End Frame', min=1, soft_max=1000, default = 100)
+    bpy.types.Scene.ant_scale = bpy.props.FloatProperty(name='Colony Scale', description='Colony Scale', min=0.0, soft_max=100.0, default = 1.0)
     bpy.types.Scene.ant_ground = bpy.props.StringProperty(name='Ground Object', description='Ground Object', default='')
     bpy.types.Scene.ant_guide = bpy.props.StringProperty(name='Guide Object', description='Guide Object', default='')
     bpy.types.Scene.ant_instance = bpy.props.StringProperty(name='Instance Object', description='Instance Object', default='')
-#    bpy.types.Scene.fistuleuse_radius_min = bpy.props.FloatProperty(name='Min rayon (mm)', description='Rayon minimal', min=0.0, soft_max=10.0, default = 1.0)
-#    bpy.types.Scene.fistuleuse_radius_max = bpy.props.FloatProperty(name='Max rayon (mm)', description='Rayon maximal', min=0.0, soft_max=10.0, default = 2.0)
-#    bpy.types.Scene.fistuleuse_excentrique = bpy.props.BoolProperty(name='Excentrique', description='Choisir entre fistulese et excentrique', default=False, )
-#    bpy.types.Scene.fistuleuse_normal = bpy.props.BoolProperty(name='Normale', description='Fistuleuses normales à leur surface', default=False, )
-#    bpy.types.Scene.fistuleuse_sol = bpy.props.BoolProperty(name='Sol', description='Fistuleuses tombées par terre', default=False, )
-#    
-#    bpy.types.Scene.fistuleuse_brush_distance = bpy.props.FloatProperty(name='Distance', description='Distance entre deux fistuleuses', min=0.0, soft_min=0.05, soft_max=10.0, default = 0.2)
-#    bpy.types.Scene.fistuleuse_brush_radius = bpy.props.FloatProperty(name='Rayon (px)', description='Rayon de la brosse', min=0.0, soft_max=50.0, default = 10.0)
-
+    
     bpy.utils.register_module(__name__)
-
 
 def unregister():
     bpy.utils.unregister_module(__name__)
-
 
 if __name__ == "__main__":
     register()
