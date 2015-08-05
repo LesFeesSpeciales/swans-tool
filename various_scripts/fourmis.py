@@ -37,15 +37,17 @@ class Particle:
 
 class Particle_system:
     
-    GUIDE_STRENGTH = 1.0
-    
-    TURBULENCE_FREQUENCY = 10
-    TURBULENCE_STRENGTH = 1.0
-    
-    AVOID_THRESHOLD = 0.05
-    AVOID_STRENGTH = 0.2
     
     def __init__(self, guide, ground, scale):
+        
+        self.GUIDE_STRENGTH = 1.0 * scale
+
+        self.TURBULENCE_FREQUENCY = 10 * scale
+        self.TURBULENCE_STRENGTH = 1.0 * scale
+
+        self.AVOID_THRESHOLD = 0.05 * scale
+        self.AVOID_STRENGTH = 0.2 * scale
+        
         self.frame = 0
         
         self.particles = []
