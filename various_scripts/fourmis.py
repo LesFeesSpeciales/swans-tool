@@ -45,7 +45,7 @@ class Particle_system:
         self.TURBULENCE_FREQUENCY = 10 * scale
         self.TURBULENCE_STRENGTH = 1.0 * scale
 
-        self.AVOID_THRESHOLD = 0.05 * scale
+        self.AVOID_THRESHOLD = 0.01 * scale
         self.AVOID_STRENGTH = 0.2 * scale
         
         self.frame = 0
@@ -157,8 +157,8 @@ class Particle_system:
                     
                 # behaviour change
                 part.behaviour += random()*0.1-0.05
-                if part.behaviour < 0.1:
-                    part.behaviour = 0.1
+                if part.behaviour < 0.8:
+                    part.behaviour = 0.8
                 if part.behaviour > 0.9:
                     part.behaviour = 0.9
                     
