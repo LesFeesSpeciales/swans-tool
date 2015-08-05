@@ -13,8 +13,8 @@ Includes efficient caching using duplication
 class Particle:
     
     
-    def __init__(self, index, location=Vector()):
-        targ_vel = 0.005
+    def __init__(self, index, scale, location=Vector()):
+        targ_vel = 0.005 * scale
         self.MAX_VEL = gauss(targ_vel, targ_vel / 10)
         
         self.location = location.copy()
@@ -33,7 +33,7 @@ class Particle:
 #            self.direction = 1
 
         
-        self.behaviour = 0.5 # 1 = guide ; 0 = turbulence
+        self.behaviour = 0.6 # 1 = guide ; 0 = turbulence
 
 class Particle_system:
     
@@ -45,7 +45,7 @@ class Particle_system:
     AVOID_THRESHOLD = 0.05
     AVOID_STRENGTH = 0.2
     
-    def __init__(self, guide, ground):
+    def __init__(self, guide, ground, scale):
         self.frame = 0
         
         self.particles = []
@@ -58,19 +58,21 @@ class Particle_system:
         self.guide_tree.balance()
         
         self.ground = ground
+        self.scale = scale
         
 #        bpy.ops.mesh.primitive_ico_sphere_add(location=(0,0,0), size=0.01)
 #        self.instance_obj = bpy.context.object
-        self.instance_obj = bpy.data.objects['Fleche']
+#        self.instance_obj = bpy.data.objects['Fleche']
+        self.instance_obj = bpy.data.objects[bpy.context.scene.ant_instance]
         self.instance_mesh = self.instance_obj.data
-        self.instance_mesh.materials.append(bpy.data.materials['noir'])
+#        self.instance_mesh.materials.append(bpy.data.materials['noir'])
         
         
     def add_particles(self, particles_number):
         '''Add a new particle to the system'''
         for p in range(particles_number):
             ind = randint(1, len(self.guide.data.vertices)-2)
-            self.particles.append(Particle(ind, self.guide.data.vertices[ind].co))
+            self.particles.append(Particle(ind, self.scale, self.guide.data.vertices[ind].co))
     
     def kill_particle(self, part):
         self.particles.remove(part)
@@ -223,7 +225,7 @@ class Particle_system:
         generator_obj.keyframe_insert('hide_render', frame=frame-1)
         
 
-if __name__ == '__main__':
+def main(context):
     
     for o in bpy.data.objects:
         if o.name.startswith('generator') or o.name.startswith('Ico') or o.name.startswith('instance'):
@@ -233,18 +235,97 @@ if __name__ == '__main__':
     
 #    guide = bpy.data.objects['Chemin']
 #    ground = bpy.data.objects['Sol']
-    guide = bpy.context.object
-    ground = bpy.context.selected_objects[-1]
-    a_ps = Particle_system(guide, ground)
-    a_ps.add_particles(100)
+    guide = bpy.data.objects[bpy.context.scene.ant_guide]
+    ground = bpy.data.objects[bpy.context.scene.ant_ground]
+    number_ants = bpy.context.scene.ant_number
+    start_frame = bpy.context.scene.ant_start_frame
+    end_frame = bpy.context.scene.ant_end_frame
+    scale = bpy.context.scene.ant_scale
+#    ground = bpy.context.selected_objects[-1]
+    a_ps = Particle_system(guide, ground, scale)
+    a_ps.add_particles(number_ants)
     
     print('\n---')
     start = time()
     seed(0)
     noise.seed_set(0)
-    for f in range(1000):
+    for f in range(start_frame, end_frame+1):
 #        a_ps.add_particles(1)
         if f%10 == 0:
             print('frame: {:04}'.format(f))
         a_ps.step()
     print('Simulated in {:05.5f} seconds'.format(time() - start))
+
+
+class AntPanel(bpy.types.Panel):
+    """"""
+    bl_category = "Tools"
+    bl_label = "Ant Generator"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'TOOLS'
+
+    def draw(self, context):
+        layout = self.layout
+
+        scene = context.scene
+
+        # Create a simple row.
+#        layout.label(text=" Simple Row:")
+
+        column = layout.column(align=True)
+        column.prop(scene, "ant_number")
+        column.prop(scene, "ant_start_frame")
+        column.prop(scene, "ant_end_frame")
+        column.prop(scene, "ant_scale")
+        column = layout.column(align=True)
+        column.prop_search(scene, "ant_ground", scene, "objects")
+        column.prop_search(scene, "ant_guide", scene, "objects")
+        column.prop_search(scene, "ant_instance", scene, "objects")
+        
+        layout.separator()
+        
+        column = layout.row()
+        column.operator("ant.generate")
+
+
+class AntOperator(bpy.types.Operator):
+    """Generate ant colony"""
+    bl_idname = "ant.generate"
+    bl_label = "Ant Generator"
+
+    @classmethod
+    def poll(cls, context):
+        return context.mode == 'OBJECT'
+
+    def execute(self, context):
+        main(context)
+        return {'FINISHED'}
+
+def register():
+    bpy.types.Scene.ant_number = bpy.props.IntProperty(name='Number Of Ants', description='Number Of Ants', min=1, soft_max=1000, default = 100)
+    bpy.types.Scene.ant_start_frame = bpy.props.IntProperty(name='Start Frame', description='Start Frame', min=0, soft_max=1000, default = 1)
+    bpy.types.Scene.ant_end_frame = bpy.props.IntProperty(name='End Frame', description='End Frame', min=1, soft_max=1000, default = 100)
+    bpy.types.Scene.ant_ground = bpy.props.StringProperty(name='Ground Object', description='Ground Object', default='')
+    bpy.types.Scene.ant_guide = bpy.props.StringProperty(name='Guide Object', description='Guide Object', default='')
+    bpy.types.Scene.ant_instance = bpy.props.StringProperty(name='Instance Object', description='Instance Object', default='')
+#    bpy.types.Scene.fistuleuse_radius_min = bpy.props.FloatProperty(name='Min rayon (mm)', description='Rayon minimal', min=0.0, soft_max=10.0, default = 1.0)
+#    bpy.types.Scene.fistuleuse_radius_max = bpy.props.FloatProperty(name='Max rayon (mm)', description='Rayon maximal', min=0.0, soft_max=10.0, default = 2.0)
+#    bpy.types.Scene.fistuleuse_excentrique = bpy.props.BoolProperty(name='Excentrique', description='Choisir entre fistulese et excentrique', default=False, )
+#    bpy.types.Scene.fistuleuse_normal = bpy.props.BoolProperty(name='Normale', description='Fistuleuses normales à leur surface', default=False, )
+#    bpy.types.Scene.fistuleuse_sol = bpy.props.BoolProperty(name='Sol', description='Fistuleuses tombées par terre', default=False, )
+#    
+#    bpy.types.Scene.fistuleuse_brush_distance = bpy.props.FloatProperty(name='Distance', description='Distance entre deux fistuleuses', min=0.0, soft_min=0.05, soft_max=10.0, default = 0.2)
+#    bpy.types.Scene.fistuleuse_brush_radius = bpy.props.FloatProperty(name='Rayon (px)', description='Rayon de la brosse', min=0.0, soft_max=50.0, default = 10.0)
+
+    bpy.utils.register_module(__name__)
+
+
+def unregister():
+    bpy.utils.unregister_module(__name__)
+
+
+if __name__ == "__main__":
+    register()
+#
+#    # test call
+#    bpy.ops.object.simple_operator()
