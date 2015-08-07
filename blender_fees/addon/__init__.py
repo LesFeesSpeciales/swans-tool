@@ -84,15 +84,20 @@ def initSceneProperties():
      s = len(property)
      
      ressources.Items.append(('none',"none",""))
-     ressources.Items_asset.append(('none',"none",""))           
+     ressources.Items_asset.append(('none',"none",""))
+
+     
+
      for i in range(s):
         #Setup store dir
-        if property[i][0][0] == 'Store':      
-            for line in range(1,len(property[i])):
-
-                ressources.Items.append((str(property[i][line][0]),str(property[i][line][1]),str(property[i][line][2])))         
-                print(ressources.Items)
-            interface.UpdateEnum(bpy.types.Scene,tuple(ressources.Items),property[i][0][0],property[i][0][1],ressources.Items[0][0])    
+        if property[i][0][0] == 'Store': 
+            if not persistence.load_config():      
+                for line in range(1,len(property[i])):
+                    ressources.Items.append((str(property[i][line][0]),str(property[i][line][1]),str(property[i][line][2])))         
+                    print('fill items..>')
+                    print(ressources.Items)
+            print(ressources.Items[0][0])
+            interface.UpdateEnum(bpy.types.Scene,ressources.Items,property[i][0][0],property[i][0][1],ressources.Items[0][0])    
         
         #Setup assets
         elif property[i][0][0] == 'asset':
@@ -101,7 +106,7 @@ def initSceneProperties():
                 ressources.Items_asset.append((str(property[i][line][0]),str(property[i][line][1]),str(property[i][line][2])))         
                 print(ressources.Items_asset)
             interface.UpdateEnum(bpy.types.Scene,tuple(ressources.Items_asset),property[i][0][0],property[i][0][1],ressources.Items_asset[0][0])
- 
+     
 
      #ROOT----------------------------->
      bpy.types.Scene.roots = EnumProperty(
@@ -124,18 +129,6 @@ def initSceneProperties():
                ('none', "none", "")),
         default='none',
         update = interface.update_naming)
-     #ASSET------------------------------------>
-     '''bpy.types.Scene.asset = EnumProperty(
-        name="asset",
-        description="/lib/type/famille/asset",
-        items=(('none', "none", ""),
-               ('criquet', "criquet", ""),
-               ('plantes', "plantes", ""),
-               ('arbres', "arbres", ""),
-               ('shader', "shader", ""),
-               ('other', "other", "")),
-        default='none',
-        update = interface.update_naming)'''
         
      #DEPARTEMENT----------------------------->
      bpy.types.Scene.dpt = EnumProperty(
@@ -150,7 +143,7 @@ def initSceneProperties():
                ('Compo', "Compo", ""),
                ('Matte', "Mat", ""),
                ('Cam', "Cam", ""),
-               ('Vfx', "Vfxr", ""),
+               ('Vfx', "Vfx", ""),
                ('Shad', "Shad", "")),
         default='none',
         update = interface.update_naming) 

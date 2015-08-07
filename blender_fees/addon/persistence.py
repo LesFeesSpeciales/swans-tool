@@ -18,28 +18,51 @@ Created by LES FEES SPECIALES
 '''
 
 import sys                #System Libraries
+import os
 from json import dumps, load
 
-def load_config(dir):
+from . import ressources
+
+def load_config():
     print('try to load config from file')
-    n = [1, 2, 3]
-    s = ["a", "b" , "c"]
-    x = 0
-    y = 0
+    ressources.command.append('Trying to load the store config')
+    homedir = os.path.expanduser('~')
+    path = homedir + '/' +'config_opener'
+    try:
+        with open(path,'r+') as file:
+            result = load(file)
+        file.close()
 
-    with open(dir, "r") as file:
-        print(file.readlines())
-    with open("text", "w") as file:
-        dumps({'numbers':n, 'strings':s, 'x':x, 'y':y}, file, indent=4)
-    file.close()
+        print ('result:'+str(type(result)))
+        print (result.keys())
+        print (result)
+        t  = []
+        for i in range(len(result['store'])):
+            t.append(tuple(result['store'][i]))
 
-    with open("text") as file:
-        result = load(file)
-    file.close()
-    print (type(result))
-    print (result.keys())
-    print (result)
+        ressources.Items = t
+        ressources.command.append('Success')
+
+        return True    
+    
+    except:
+        ressources.command.append('Config not found create it')
+        #write new default conf
+        with open(path, "w+") as file:
+            file.write(dumps({'store':ressources.Items}, file, indent=1))
+        file.close() 
+
+        return False
 
 def write_config():
+    #Vars
+    homedir = os.path.expanduser('~')
+    path = homedir + '/' +'config_opener'
+
     print('saving config for next startup')
+    ressources.command.append('Trying to save the store config')
+
+    with open(path, "w+") as file:
+        file.write(dumps({'store':ressources.Items}, file, indent=1))
+    file.close()
 

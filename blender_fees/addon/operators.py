@@ -22,11 +22,18 @@ import bpy
 from bpy.props import *
 import os.path            #Files functions of os lib
 import sys  
+import addon_utils #utils to find addons path
+import shutil #Used to copy files 
+
 from . import files
 from . import gui
 from . import interface
 from . import ressources
-from . import __init__
+from . import persistence
+
+for x in range(len(addon_utils.paths())):
+    appending = sys.path.append(addon_utils.paths()[x]+'/addon/python3x') #Appending naming libs
+    print(appending)
 
 
 '''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -132,27 +139,37 @@ class file_op(bpy.types.Operator):
     def execute(self, context):
         #CREATING NEW FILES------>
         if self.action == "NEW": 
-            print("create directories")
-            interface.create_naming(bpy.context,bpy.context,'CREATE',ressources.path,ressources.command)
-            p = bpy.context.scene.newF
-            print("saving file to :"+str(p))  
-            for x in range(0,len(addon_utils.paths())):
-                print(addon_utils.paths()[x]+'/addon/base.blend')
-                if os.path.isfile(addon_utils.paths()[x]+'/addon/base.blend'):
-                    shutil.copyfile(addon_utils.paths()[x]+'/addon/base.blend',p) 
-                    print("new file copied")
-                    break
-                else:
-                    print("copy error")
-            bpy.ops.wm.open_mainfile(filepath = p)
-                
+            #Checking if file is already existing
+            if not os.path.isfile(bpy.context.scene.newF):
+                print("create directories")
+                interface.create_naming(bpy.context,bpy.context,'CREATE',ressources.path,ressources.command)
+                p = bpy.context.scene.newF
+                print("saving file to :"+str(p))  
+                for x in range(0,len(addon_utils.paths())):
+                    print(addon_utils.paths()[x]+'/addon/base.blend')
+                    if os.path.isfile(addon_utils.paths()[x]+'/addon/base.blend'):
+                        shutil.copyfile(addon_utils.paths()[x]+'/addon/base.blend',p) 
+                        print("new file copied")
+                        ressources.command.append("new file copied")
+                        break
+                    else:
+                        print("copy error")
+                        ressources.command.append("Copy error")
+                bpy.ops.wm.open_mainfile(filepath = p)
+            else:
+                ressources.command.append("File already EXIST !")
         #OPENING FILES----------->            
         elif self.action == "OPEN":
             print("opening file")
             file_name =  bpy.context.scene.custom[bpy.context.scene.custom_index].name
             if len(file_name) > 3: #checking if a file is selected
                 p = files.getPath(bpy.context.scene.newF)+file_name
-                bpy.ops.wm.open_mainfile(filepath = p)
+                #Checking file existence
+                if os.path.isfile(p):
+                    ressources.command.append("opening file :"+str(p))
+                    bpy.ops.wm.open_mainfile(filepath = p)
+                else:
+                    ressources.command.append("unknown directory :"+str(p))
             else:
                 print('no file selected')
             
@@ -184,11 +201,11 @@ class OBJECT_OT_custompath(bpy.types.Operator):
     __doc__ = ""   
     
     filename_ext = ""
-    filter_glob = StringProperty(default="", options={'HIDDEN'})    
+    filter_glob = StringProperty(default="", options={'HIDDEN'},subtype='DIR_PATH')    
         
     #this can be look into the one of the export or import python file.
     #need to set a path so so we can get the file name and path
-    filepath = StringProperty(name="File Path", description="Filepath used for importing txt files", maxlen= 1024, default= "")
+    filepath = StringProperty(name="File Path", description="Filepath importing store dir", maxlen= 1024, default= "")
     files = CollectionProperty(
         name="File Path",
         type=bpy.types.OperatorFileListElement,
@@ -205,6 +222,10 @@ class OBJECT_OT_custompath(bpy.types.Operator):
         print("FILEPATH %s"%self.properties.filepath)#display the file name and current path    
         ressources.Items.append((str(self.properties.filepath),str(self.properties.filepath),""))
         interface.UpdateEnum(bpy.types.Scene,ressources.Items,'Store',str(self.properties.filepath),str(self.properties.filepath))
+        
+        #Save the config of drives
+        persistence.write_config()
+        
         return {'FINISHED'}
 
     def draw(self, coitemntext):

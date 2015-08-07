@@ -149,13 +149,13 @@ def update_naming(self, context):
 def UpdateEnum(Enums,Items,Name,Description,Defaults):
     print("update file list")
     print('name:'+Name+' Description:'+Description)
-    print('Items:'+str(Items))
+    print('Items:'+str(tuple(Items)))
     if Name == 'Store': 
         print('updating:'+Name)   
         bpy.types.Scene.drives= EnumProperty(
             name=Name,
             description=Description,
-            items=Items,
+            items=tuple(Items),
             default=Defaults)  
     elif Name == 'asset':
         bpy.types.Scene.asset= EnumProperty(

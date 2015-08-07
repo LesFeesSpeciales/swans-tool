@@ -19,6 +19,9 @@ Created by LES FEES SPECIALES
 
 
 import bpy
+
+from . import ressources
+
 import os.path
 from bpy.props import IntProperty, CollectionProperty #, StringProperty 
 from bpy.props import *   #Blender properties lib
@@ -143,14 +146,23 @@ def Update_ListFile(dir):
     
     dir = bpy.context.scene.newF.split('/')
     directory = ''
+    #making dir
     for i in range(len(dir)-1):
         directory = directory + dir[i]+'/'
-    list = listFiles(directory,".blend")
-    print(directory)
-    print(list)
-    for i in range(len(list)):
-        bpy.context.scene.custom.add() #Adding new empty file to the ui list
-        bpy.context.scene.custom[i].name = list[i] #Fill it with info : name
+    #Checking dir existence
+    if os.path.isdir(directory):
+        list = listFiles(directory,".blend")
+        print(directory)
+        print(list)
+        
+        for i in range(len(list)):
+            bpy.context.scene.custom.add() #Adding new empty file to the ui list
+            bpy.context.scene.custom[i].name = list[i] #Fill it with info : name
+
+        ressources.command.append("Files successfull listed")
+    else:
+        bpy.context.scene.custom.clear()
+        ressources.command.append("Folder empty")
 
 #...................................
 #         getPath                  #
