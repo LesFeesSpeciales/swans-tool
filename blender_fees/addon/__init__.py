@@ -85,8 +85,7 @@ def initSceneProperties():
      
      ressources.Items.append(('none',"none",""))
      ressources.Items_asset.append(('none',"none",""))
-
-     
+   
 
      for i in range(s):
         #Setup store dir
@@ -102,11 +101,11 @@ def initSceneProperties():
         #Setup assets
         elif property[i][0][0] == 'asset':
             for line in range(1,len(property[i])):
-
                 ressources.Items_asset.append((str(property[i][line][0]),str(property[i][line][1]),str(property[i][line][2])))         
                 print(ressources.Items_asset)
             interface.UpdateEnum(bpy.types.Scene,tuple(ressources.Items_asset),property[i][0][0],property[i][0][1],ressources.Items_asset[0][0])
-     
+        
+
 
      #ROOT----------------------------->
      bpy.types.Scene.roots = EnumProperty(

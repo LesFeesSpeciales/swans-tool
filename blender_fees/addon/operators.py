@@ -60,7 +60,7 @@ class XP(bpy.types.Operator):
     
     def execute(self, context):
         if context.scene.hidec:
-            context.scene.hid,commandec = False
+            context.scene.hidec = False
         else:
             context.scene.hidec = True
             

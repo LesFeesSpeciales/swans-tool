@@ -177,3 +177,12 @@ def getPath(dir):
     print('get dir:'+directory)
 
     return directory
+
+#...................................
+#         listdirs                 #
+#                                  #
+#   List the forlders or a dir     #
+#...................................
+def listdirs(dir):
+    return [os.path.join(os.path.join(dir, x)) for x in os.listdir(dir) 
+        if os.path.isdir(os.path.join(dir, x))]

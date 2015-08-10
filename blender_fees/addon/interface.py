@@ -21,6 +21,7 @@ import bpy
 
 from . import ressources
 from . import files
+from . import persistence
 
 
 from bpy.props import *
@@ -129,15 +130,31 @@ def update_naming(self, context):
             ressources.path['Version'] = 'v0'+str(v)
         else:
             ressources.path['Version'] = 'v'+str(v)
-            
+
+    #Upgrade asset
+    if (bpy.context.scene.famille != 'none') and (bpy.context.scene.roots != 'MOVIE') and (bpy.context.scene.drives != 'none'):
+        temp = persistence.load_asset()
+        for i in range(len(temp)):
+            y = (str(temp[i]),str(temp[i]),'')
+            if y not in ressources.Items_asset:
+                ressources.Items_asset.append((str(temp[i]),str(temp[i]),''))
+        
+        UpdateEnum('',ressources.Items_asset,'asset','','')
+
+
     #path['Version'] = 'v00'    
     ressources.path['Extension'] = 'blend' 
     #pprint(path)
-    print('naming'+str(create_naming(self,context,'',ressources.path,ressources.command)))
+    #print('naming'+str(create_naming(self,context,'',ressources.path,ressources.command)))
     print('newwF:'+bpy.context.scene.newF)
     
-    bpy.context.scene.newF = create_naming(self,context,'',ressources.path,ressources.command)
-    files.Update_ListFile(bpy.context.scene.newF)
+    try:
+        bpy.context.scene.newF = create_naming(self,context,'',ressources.path,ressources.command)   
+        files.Update_ListFile(bpy.context.scene.newF)
+    except:
+        print('naming no setup, clearing list')
+        bpy.context.scene.custom.clear() #Clearing scene 
+        ressources.command.append("! missing field !")
     
     return None
 
@@ -156,10 +173,12 @@ def UpdateEnum(Enums,Items,Name,Description,Defaults):
             name=Name,
             description=Description,
             items=tuple(Items),
-            default=Defaults)  
+            default=Defaults,
+            update=update_naming)  
     elif Name == 'asset':
         bpy.types.Scene.asset= EnumProperty(
             name=Name,
             description=Description,
             items=tuple(Items),
-            default='none')
+            default='none',
+            update=update_naming)

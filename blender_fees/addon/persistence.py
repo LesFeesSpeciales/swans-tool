@@ -16,18 +16,29 @@ Created by LES FEES SPECIALES
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-
+import bpy
 import sys                #System Libraries
 import os
 from json import dumps, load
+from bpy.props import IntProperty, CollectionProperty #, StringProperty 
+from bpy.types import Panel, UIList #Some UI Blender Libs
 
 from . import ressources
+from . import files
 
+#...................................
+#         load_config              #
+#                                  #
+#   load the config of the store   #
+#               dir                #
+#...................................
 def load_config():
     print('try to load config from file')
     ressources.command.append('Trying to load the store config')
     homedir = os.path.expanduser('~')
     path = homedir + '/' +'config_opener'
+
+    #If the file exist then read it
     try:
         with open(path,'r+') as file:
             result = load(file)
@@ -44,7 +55,7 @@ def load_config():
         ressources.command.append('Success')
 
         return True    
-    
+    #Else wrote it
     except:
         ressources.command.append('Config not found create it')
         #write new default conf
@@ -54,6 +65,12 @@ def load_config():
 
         return False
 
+#...................................
+#         write_config             #
+#                                  #
+#   write the config of the        #
+#           Store                  #
+#...................................
 def write_config():
     #Vars
     homedir = os.path.expanduser('~')
@@ -66,3 +83,35 @@ def write_config():
         file.write(dumps({'store':ressources.Items}, file, indent=1))
     file.close()
 
+#...................................
+#         load_asset               #
+#                                  #
+#   load assets from directory     #
+#...................................
+def load_asset():
+    print('Load asset from files')
+
+    #list subdir from libs dir
+    root = bpy.context.scene.drives + ressources.path['Lib']+'/'
+    print('root:'+root)
+
+    if os.path.isdir(root):
+        dir_to_go = files.listdirs(root)
+        print(dir_to_go)
+        asset = []
+
+        for folder in dir_to_go:
+            a = files.listdirs(folder)
+            print(a)
+            for x in range(len(a)):
+                if a[x].split('/')[len(a[x].split('/'))-1] not in asset:
+                    asset.append(a[x].split('/')[len(a[x].split('/'))-1])
+
+        print("ASSET:")
+        print(asset)
+
+    else:
+        asset.append('none')
+
+
+    return asset
