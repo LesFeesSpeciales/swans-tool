@@ -18,7 +18,11 @@
 # See blender --help for details.
 
 import bpy
-import os
+import os, time
+
+
+
+### UTILS
 
 def get_name_pattern(name, token='#'):
     """Get a string's padding pattern"""
@@ -63,6 +67,8 @@ def get_frame_number(name, token='#'):
     for i in range(len(l)-1, -1, -1):
         if l[i][0].isdigit():
             return int(l[i])
+
+    return 0
             
 def padding(s, frame):
     """Get frame's final name from expression"""
@@ -89,7 +95,10 @@ def padding(s, frame):
         out = '{}{:04}'.format(out,frame)
     return out
 
-def add_text(sequencer, text, position, channel, frame, font_color=[1.0,1.0,1.0]):
+
+#####
+
+def add_text(sequencer, text, position, size, channel, frame, align, font_color=[1.0,1.0,1.0]):
     #TODO: BG
     #
 
@@ -98,84 +107,239 @@ def add_text(sequencer, text, position, channel, frame, font_color=[1.0,1.0,1.0]
         s.select = False
 
 
-    txt_seq = sequencer.sequences.new_effect('{}_f{:04}'.format(text, frame), 'TEXT', channel, frame+1, frame+2)
+    txt_seq = sequencer.sequences.new_effect('{}_f{:04}'.format(text, frame), 'TEXT', channel, frame, frame+1)
     txt_seq.text = text
     # txt_seq.blend_type = 'OVER_DROP'
     txt_seq.location = position
+    txt_seq.align = align
+    txt_seq.font_size = size
 
-    txt_seq = sequencer.sequences.new_effect('{}_f{:04}_BG'.format(text, frame), 'COLOR', channel+1, frame+1, frame+2)
-    txt_seq.color = font_color
-    txt_seq.blend_type = 'MULTIPLY'
+    col_seq = sequencer.sequences.new_effect('{}_f{:04}_BG'.format(text, frame), 'COLOR', channel+1, frame, frame+1)
+    col_seq.color = font_color
+    col_seq.blend_type = 'MULTIPLY'
     # txt_seq.location = position
 
     bpy.ops.sequencer.meta_make()
-    meta = sequencer.active_strip
-    meta.blend_type = 'OVER_DROP'
+    meta_strip = sequencer.active_strip
+    meta_strip.blend_type = 'OVER_DROP'
 
 
-def render_stamp(images_paths, text, render_dir):
+class Metadata:
+    """Base Metadata class. Subclass to implement other types"""
+    def __init__(self, parent_stamp, meta_dict, screen_position, channel):
+        
+        self.screen_position = screen_position
 
-    scene = bpy.context.scene
-    sequencer = scene.sequence_editor_create()
-    
+        # screen_position in
+        # [
+        #   'TOP-LEFT',    'TOP',    'TOP-RIGHT',
+        #   'LEFT',        'CENTER', 'RIGHT',
+        #   'BOTTOM-LEFT', 'BOTTOM', 'BOTTOM-RIGHT'
+        # ]
 
-    # Get images using same pattern in dir
-    if len(images_paths) == 1:
-        imgs = []
-        img_dir, img_name = os.path.split(images_paths[0])
-        pattern = get_name_pattern(img_name)
-        file_list = os.listdir(img_dir)
-        for f in file_list:
-            if get_name_pattern(f) == pattern:
-                imgs.append(os.path.join(img_dir, f))
-        images_paths = imgs
-        images_paths.sort(key=get_frame_number)
+        self.parent_stamp = parent_stamp
+        self.field = meta_dict['field']
+        self.value = meta_dict['value']
+        self.color = meta_dict['color']
+        self.size  = meta_dict['size']
+        self.inline  = meta_dict['inline']
+
+        self.channel = channel
+
+        if screen_position[0] == 0:
+            self.align = 'LEFT'
+        elif screen_position[0] == 1:
+            self.align = 'CENTER'
+        elif screen_position[0] == 2:
+            self.align = 'RIGHT'
+
+    def get_text(self, frame):
+        return '{} : {}'.format(self.field, self.value)
+
+    def get_blender_position(self):
+        x, y = 0.0, 0.0
+        # iterate through all other meta, calculate their size and
+        # add them if they're on the same quadrant, until we reach this one
+
+        previous_meta = None
+        for other_meta in self.parent_stamp.metadatas:
+
+            if other_meta.screen_position == self.screen_position: #same quadrant
+                if previous_meta is None:
+                    if other_meta == self:
+                        break
+                    previous_meta = other_meta
+                    continue
+
+                if other_meta.inline:
+                    x += previous_meta.size * (len(previous_meta.get_text(0)) + 2) * 3/5 / self.parent_stamp.resolution[0]
+                else:
+                    x = 0.0
+                    y += previous_meta.size / self.parent_stamp.resolution[1]
+
+                previous_meta = other_meta
+
+                if previous_meta == self:
+                    break
+
+        # if not self.inline:
+        # # else:
+        #     x = 0.0
+        #     y += other_meta.size / self.parent_stamp.resolution[1]
+
+        if self.screen_position[0] == 1:
+            x += 0.5 
+        if self.screen_position[1] == 1:
+            y += 0.5 
+
+        if self.screen_position[0] == 2:
+            x = 1.0 - x
+        if self.screen_position[1] == 2:
+            y = 1.0 - y - self.size / self.parent_stamp.resolution[1]
 
 
-    img_seq = sequencer.sequences.new_image('img', images_paths[0], 1, 1)
+        return x,y
+
+    def render(self):
+
+        for f in range(*self.parent_stamp.frame_range):
+
+            text = self.get_text(f)
+            channel = 2
+
+            add_text(self.parent_stamp.sequencer, text, self.get_blender_position(), self.size, channel, f, self.align, self.color)
+            # txt_seq = sequencer.sequences.new_effect('txt_{:04}'.format(f), 'TEXT', 2, f+1, f+2)
+            # txt_seq.text = text + ' {:04}'.format(f+1)
+            # txt_seq.blend_type = 'OVER_DROP'
+
+class Frame_Metadata(Metadata):
+    def get_text(self, frame):
+        return '{} : {:02}'.format(self.field, frame)
+
+class Date_Metadata(Metadata):
+    def get_text(self, frame):
+        return '{} : {}'.format(self.field, time.strftime("%d/%m/%Y"))
 
 
-    for i in images_paths[1:]:
-        img_seq.elements.append(os.path.basename(i))
+class Render_stamp:
+    def __init__(self, metadata, images_paths, render_dir):
+        # self.metadatas = [[[] for x in range(3)] for y in range(3)]
+        self.metadatas = []
+
+        self.setup_sequencer(images_paths, render_dir)
+
+        for m in metadata:
+            self.insert(m)
+
+        for m in self.metadatas:
+            m.render()
+
+        self.render()
 
 
-    # Scene options
-    scene.frame_end = img_seq.frame_final_duration
+    def setup_sequencer(self, images_paths, render_dir):
 
-    img_seq.update()
-    scene.update()
+        scene = bpy.context.scene
+        self.sequencer = scene.sequence_editor_create()
 
+        # Get images using same pattern in dir
+        if len(images_paths) == 1:
+            imgs = []
+            img_dir, img_name = os.path.split(images_paths[0])
+            pattern = get_name_pattern(img_name)
+            file_list = os.listdir(img_dir)
+            for f in file_list:
+                if get_name_pattern(f) == pattern:
+                    imgs.append(os.path.join(img_dir, f))
+            images_paths = imgs
+            images_paths.sort(key=get_frame_number)
 
-    # Get image size
-    img = bpy.data.images.load(images_paths[0])
-    print(list(img.size))
-    # print(img_seq.elements[0].filename)
-    # print('resolution:', img_seq.elements[0].orig_width, img_seq.elements[0].orig_height)
-
-    scene.render.resolution_x = img.size[0]
-    scene.render.resolution_y = img.size[1]
-
-    # scene.render.resolution_x = img_seq.elements[0].orig_width
-    # scene.render.resolution_y = img_seq.elements[0].orig_height
-    scene.render.resolution_percentage = 100
-    
-    scene.render.filepath = '//machin'
-
-    if bpy.app.build_options.codec_ffmpeg:
-        scene.render.image_settings.file_format = 'H264'
-        scene.render.ffmpeg.format = 'QUICKTIME'
-
-    scene.render.filepath = render_dir
-    print(render_dir)
+        
+        # self.sequence_length = len(images_paths)
+        # print('Sequence length:', self.sequence_length)
 
 
-    for f in range(len(images_paths)):
-        add_text(sequencer, 'Frame: {:04}'.format(f), [0.5, 0.0], 2, f, [0,0,1])
-        # txt_seq = sequencer.sequences.new_effect('txt_{:04}'.format(f), 'TEXT', 2, f+1, f+2)
-        # txt_seq.text = text + ' {:04}'.format(f+1)
-        # txt_seq.blend_type = 'OVER_DROP'
+        scene.frame_start = get_frame_number(images_paths[0])
+        scene.frame_end = get_frame_number(images_paths[-1])
+        self.frame_range = (scene.frame_start, scene.frame_end+1)
+        # scene.frame_end = img_seq.frame_final_duration
 
-    bpy.ops.render.render(animation=True)
+        img_seq = self.sequencer.sequences.new_image('img', images_paths[0], 1, scene.frame_start)
+
+
+        for i in images_paths[1:]:
+            img_seq.elements.append(os.path.basename(i))
+
+
+        # Scene options
+
+        img_seq.update()
+        scene.update()
+
+
+        # Get image size
+        img = bpy.data.images.load(images_paths[0])
+        # print(img_seq.elements[0].filename)
+        # print('resolution:', img_seq.elements[0].orig_width, img_seq.elements[0].orig_height)
+
+        scene.render.resolution_x = img.size[0]
+        scene.render.resolution_y = img.size[1]
+        self.resolution = img.size[0], img.size[1]
+
+        # scene.render.resolution_x = img_seq.elements[0].orig_width
+        # scene.render.resolution_y = img_seq.elements[0].orig_height
+        scene.render.resolution_percentage = 100
+        
+        scene.render.filepath = '//machin'
+
+        if bpy.app.build_options.codec_ffmpeg:
+            scene.render.image_settings.file_format = 'H264'
+            scene.render.ffmpeg.format = 'QUICKTIME'
+
+        scene.render.filepath = render_dir
+
+    def insert(self, meta):
+        position = meta['position'].split('-')
+        if len(position) == 1:
+            if position[0] in ['LEFT', 'RIGHT']:
+                position.append('CENTER')
+            if position[0] in ['TOP', 'BOTTOM']:
+                position.insert(0, 'CENTER')
+            if position[0] == 'CENTER':
+                position.append('CENTER')
+
+        if position[1]   == 'LEFT':
+            x = 0
+        elif position[1] == 'CENTER':
+            x = 1
+        elif position[1] == 'RIGHT':
+            x = 2
+
+        if position[0] == 'BOTTOM':
+            y = 0
+        elif position[0] == 'CENTER':
+            y = 1
+        elif position[0]   == 'TOP':
+            y = 2
+
+        channel = 2
+
+        # print('\n', meta['field'])
+        # print(meta['field'] == 'Frame')
+
+        if meta['field'] == 'Frame':
+            meta_type = Frame_Metadata
+        elif meta['field'] == 'Date':
+            meta_type = Date_Metadata
+        else:
+            meta_type = Metadata
+
+        # print(meta_type)
+        self.metadatas.append(meta_type(self, meta, (x, y), channel))
+
+
+    def render(self):
+        bpy.ops.render.render(animation=True)
 
 
 def main():
@@ -201,7 +365,7 @@ def main():
     """Select images to add to sequence and arguments for metadata"""
       # stamp.py --background --python """ + os.path.basename(__file__) + """ -- [options]"""
 
-    parser = argparse.ArgumentParser(description=usage_text, prog="stamp.py")
+    parser = argparse.ArgumentParser(description=usage_text, prog="python stamp.py")
 
     # Example utility, add some text and renders or saves it (with options)
     # Possible types are: string, int, long, choice, float and complex.
@@ -241,11 +405,63 @@ def main():
         parser.print_help()
         return
 
+    # Default render dir
     if not args.render_dir:
         args.render_dir = os.path.dirname(args.image[0]) + os.path.sep
 
-    # Run the example function
-    render_stamp(args.image, args.text, args.render_dir)
+    ### TODO: parse metadata
+    default_meta = {
+        'position': 'BOTTOM-LEFT',
+        'field': 'Field',
+        'value': 'Value',
+        'color': [1.0, 1.0, 1.0], 
+        'size': 10,
+        'inline': False
+    }
+
+    print(type(vars(args)))
+
+    for k, v in vars(args).items():
+        print('{:<15} : {}'.format(k,v))
+
+    metadata = \
+    [
+        {
+            'position': 'BOTTOM-LEFT',
+            'field': 'Séquence',
+            'value': 'S001',
+            'color': [1.0, 0.0, 0.0], 
+            'size': 15,
+            'inline': False
+        },
+        {
+            'position': 'BOTTOM-LEFT',
+            'field': 'Plan',
+            'value': 'P02',
+            'color': [0.0, 0.0, 1.0], 
+            'size': 15,
+            'inline': True
+        },
+        {
+            'position': 'BOTTOM-LEFT',
+            'field': 'Frame',
+            'value': None,
+            'color': [0.0, 0.0, 1.0], 
+            'size': 15,
+            'inline': False
+        },
+        {
+            'position': 'BOTTOM-LEFT',
+            'field': 'Date',
+            'value': None,
+            'color': [0.0, 1.0, 0.0], 
+            'size': 15,
+            'inline': True
+        }
+    ]
+
+    stamp = Render_stamp(metadata, args.image, args.render_dir)
+    # render_stamp(args.image, args.text, args.render_dir)
     print("batch job finished, exiting")
 
 
