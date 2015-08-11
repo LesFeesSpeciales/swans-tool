@@ -1,16 +1,63 @@
-from pprint import pprint
+'''
+Copyright (C) 2015 LES FEES SPECIALES
+
+Created by LES FEES SPECIALES
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+'''
+
 import bpy
-import os.path
 from bpy.props import *
-import sys
-sys.path.append('/u/lib/python3x')
-import naming.Herakles as naming
 from bpy.props import IntProperty, CollectionProperty #, StringProperty 
-from bpy.types import Panel, UIList
-import shutil
+from bpy.types import Panel, UIList #Some UI Blender Libs
+
+import os.path            #Files functions of os lib
+import sys  
+
+from . import files
+from . import interface
+from . import ressources
 
 
-'''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+'''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+                     File UIList
+            Stock the file list into the UI
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'''
+
+# return name of selected object
+def get_activeSceneObject():
+    return bpy.context.scene.objects.active.name
+
+# custom list to display files into Tools
+class UL_items(UIList):
+
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+        split = layout.split(0.6)
+        split.prop(item, "name", text="", emboss=False, translate=False, icon='FILE')
+       
+
+    def invoke(self, context, event):
+        pass   
+
+# Create custom property group
+class CustomProp(bpy.types.PropertyGroup):
+    name = StringProperty() 
+    id = IntProperty()
+
+
+'''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<item
 
                 GUI CREATION
 
@@ -27,13 +74,13 @@ class naming_panel(bpy.types.Panel):
         scn = context.scene    
         row = layout.row()
         box = layout.box()
-        #Example of external drawing function: draw_opener(self,bpy.context,command)
+        #Example of external drawing function: draw_opener(self,bpy.context,ressources.command)
         
         row = box.row(align=True)
         
         #---> PANEL HIDE 
         if scn.hidecreator:            
-            row.operator("scene.hide",text="",emboss=False,icon='TRIA_RIGHT')    
+            row.operator("scene.hide",text="",emboss=False,icon='TRIA_RIGHT')
             
             row.label(text='FILE TOOLS')
             row.separator()
@@ -41,7 +88,7 @@ class naming_panel(bpy.types.Panel):
             
         #---> PANEL NOT HIDE        
         elif not scn.hidecreator:
-            row.operator("scene.hide",text="",emboss=False,icon='TRIA_DOWN') 
+            row.operator("scene.hide",text="",emboss=False,icon='TRIA_DOWN')
             row.label(text='FILE TOOLS')   
             
             row.operator("scene.help",text="",emboss=False,icon='HELP')
@@ -146,7 +193,7 @@ class naming_panel(bpy.types.Panel):
                 #col.row(align=True)
                 sub = col.column(align=True)
                 sub.prop(scn, "asset",expand=False,text='')
-                if scn.asset == 'NEW':
+                if scn.asset == 'other':
                   sub.prop(scn, "newA")
                 
                 row = box.row()
@@ -203,9 +250,17 @@ class naming_panel(bpy.types.Panel):
                 box2=box.row()
                 
                 #box2= box.box()
-                for i in range(len(command)):    
-                   
-                    box2.label(text=">> "+command[i])
+                for i in range(len(ressources.command)-1,-1,-1):    
+                    box2.label(text=">> "+ressources.command[i])
                     box2.scale_y=0.3
                     box2=box.row()
-      
+
+    
+def register():
+
+    bpy.types.Scene.custom = CollectionProperty(type=CustomProp)
+    bpy.types.Scene.custom_index = IntProperty()
+
+def unregister():
+    del bpy.types.Scene.custom
+    del bpy.types.Scene.custom_index    
