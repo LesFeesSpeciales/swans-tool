@@ -1,4 +1,4 @@
-﻿'''
+'''
 Copyright (C) 2015 LES FEES SPECIALES
 
 Created by LES FEES SPECIALES
@@ -18,7 +18,7 @@ Created by LES FEES SPECIALES
 '''
 
 
-import bpy #import blender
+import bpy
 
 from . import ressources
 
