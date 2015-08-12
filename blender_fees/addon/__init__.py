@@ -65,7 +65,7 @@ property = []#contain all props in a near futur.....
 
 #-----NAMING VARS-------
 drives = (('Store',"Store directory",''),('/u/Project/',"/u/Project/",''),('test2_1',"test2_2",''),('',"",''))
-asset = (('asset',"/lib/type/famille/asse",''),('criquet', "criquet", ""),('plantes', "plantes", ""),('arbres', "arbres", ""),('shader', "shader", ""),('other', "other", ""))
+asset = (('asset',"/lib/type/famille/asse",''),('criquet', "criquet", ""),('plantes', "plantes", ""),('arbres', "arbres", ""),('other', "other", ""))
 is_wild = 'True'
 
 #adding ))

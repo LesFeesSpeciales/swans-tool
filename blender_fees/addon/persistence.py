@@ -104,9 +104,12 @@ def load_asset():
             a = files.listdirs(folder)
             print(a)
             for x in range(len(a)):
-                if a[x].split('/')[len(a[x].split('/'))-1] not in asset:
-                    asset.append(a[x].split('/')[len(a[x].split('/'))-1])
-
+                if sys.platform != 'win32':   
+                    if a[x].split('/')[len(a[x].split('/'))-1] not in asset:
+                        asset.append(a[x].split('/')[len(a[x].split('/'))-1])
+                else:
+                    if a[x].split('\\')[len(a[x].split('\\'))-1] not in asset:
+                        asset.append(a[x].split('\\')[len(a[x].split('\\'))-1])
         print("ASSET:")
         print(asset)
 
