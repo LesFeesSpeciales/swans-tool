@@ -1,4 +1,4 @@
-bl_info = {
+﻿bl_info = {
     "name": "Les Fees Speciales",
     "author":"Les Fees Speciales",
     "version":(1,0),

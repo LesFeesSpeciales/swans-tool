@@ -1,4 +1,4 @@
-'''
+﻿'''
 Copyright (C) 2015 LES FEES SPECIALES
 
 Created by LES FEES SPECIALES
@@ -150,6 +150,7 @@ class file_op(bpy.types.Operator):
                     if os.path.isfile(addon_utils.paths()[x]+'/addon/base.blend'):
                         shutil.copyfile(addon_utils.paths()[x]+'/addon/base.blend',p) 
                         print("new file copied")
+
                         ressources.command.append("new file copied")
                         break
                     else:
@@ -168,6 +169,9 @@ class file_op(bpy.types.Operator):
                 if os.path.isfile(p):
                     ressources.command.append("opening file :"+str(p))
                     bpy.ops.wm.open_mainfile(filepath = p)
+                    #Refresh ans asset LIST UI List before breaking
+                    files.Update_ListFile(bpy.context.scene.newF)
+                    interface.UpdateEnum('',ressources.Items_asset,'asset','','')
                 else:
                     ressources.command.append("unknown directory :"+str(p))
             else:
