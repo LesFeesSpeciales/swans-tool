@@ -1,4 +1,4 @@
-'''
+﻿'''
 Copyright (C) 2015 LES FEES SPECIALES
 
 Created by LES FEES SPECIALES
@@ -135,7 +135,10 @@ class naming_panel(bpy.types.Panel):
                 
                 col = split.column()   
                 sub = col.column(align=True)
-                sub.prop(scn, "seq",expand=False,text='')
+                subrow = sub.row(align=True)
+                subrow.prop(scn, "seq",expand=False,text='')
+                subrow.operator("scene.add_asset",text="", icon='PLUS').add = 'seq'
+
                 #row = box.row()
                 
                 if scn.seq == 'NEW':
@@ -155,7 +158,9 @@ class naming_panel(bpy.types.Panel):
                 
                 col = split.column()   
                 sub = col.column(align=True)
-                sub.prop(scn, "shot",expand=False,text='')
+                subrow = sub.row(align=True)
+                subrow.prop(scn, "shot",expand=False,text='')
+                subrow.operator("scene.add_asset",text="", icon='PLUS').add = 'shot'
                 #row = box.row()
                 
                 if scn.shot == 'NEW':
@@ -194,7 +199,9 @@ class naming_panel(bpy.types.Panel):
                 sub = col.column(align=True)
                 sub.prop(scn, "asset",expand=False,text='')
                 if scn.asset == 'other':
-                  sub.prop(scn, "newA")
+                  subrow = sub.row(align=True)
+                  subrow.prop(scn, "newA")
+                  subrow.operator("scene.add_asset",text="", icon='PLUS').add = 'asset'
                 
                 row = box.row()
                 
@@ -224,7 +231,7 @@ class naming_panel(bpy.types.Panel):
             
             row.operator("scene.file_op",text="NEW",emboss=True,icon='FILE').action = "NEW" 
             row.operator("scene.file_op",text="SAVE AS",emboss=True,icon='PASTEDOWN').action = "SAVE_AS" 
-            row.operator("scene.file_op",text="OPEN",emboss=True,icon='NEWFOLDER').action = "OPEN"
+            row.operator("scene.file_op",text="OPEN",emboss=True,icon='COPYDOWN').action = "OPEN"
             
             
             if scn.wild:
