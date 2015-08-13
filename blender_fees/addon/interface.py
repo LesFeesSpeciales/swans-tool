@@ -1,4 +1,4 @@
-'''
+﻿'''
 Copyright (C) 2015 LES FEES SPECIALES
 
 Created by LES FEES SPECIALES
@@ -104,11 +104,16 @@ def update_naming(self, context):
         ressources.path['Lib'] = 'LIB'
         ressources.path['Family']=bpy.context.scene.famille
         if bpy.context.scene.asset == 'other':
-            ressources.path['Asset']=bpy.context.scene.newA
-            ressources.Items_asset.append((str(bpy.context.scene.newA),str(bpy.context.scene.newA),''))
-            UpdateEnum('',ressources.Items_asset,'asset','','')
-            bpy.context.scene.asset = bpy.context.scene.newA
-
+            tempAsset = (str(bpy.context.scene.newA),str(bpy.context.scene.newA),'')
+            if tempAsset not in ressources.Items_asset:
+                ressources.path['Asset']=bpy.context.scene.newA
+                ressources.Items_asset.append((str(bpy.context.scene.newA),str(bpy.context.scene.newA),''))
+                UpdateEnum('',ressources.Items_asset,'asset','','')
+                bpy.context.scene.asset = bpy.context.scene.newA
+                #bpy.context.scene.newA ="none"
+            else:
+                bpy.context.scene.newA = ""
+          
         else:
             ressources.path['Asset']=bpy.context.scene.asset
         ressources.path['Dept']=bpy.context.scene.dpt
@@ -182,3 +187,14 @@ def UpdateEnum(Enums,Items,Name,Description,Defaults):
             items=tuple(Items),
             default='none',
             update=update_naming)
+    elif Name == 'seq':
+        print('ITEEM:')
+        print(Items)
+        print('END')
+        bpy.types.Scene.seq= EnumProperty(
+            name=Name,
+            description=Description,
+            items=tuple(Items),
+            default=Defaults,
+            update=update_naming)
+        
