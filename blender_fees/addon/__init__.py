@@ -1,4 +1,4 @@
-bl_info = {
+﻿bl_info = {
     "name": "Les Fees Speciales",
     "author":"Les Fees Speciales",
     "version":(1,0),
@@ -26,12 +26,23 @@ Created by LES FEES SPECIALES
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-from . import ressources 
-from . import gui
-from . import interface
-from . import files
-from . import operators
-from . import persistence
+import imp
+
+try:
+    imp.reload(ressources)
+    imp.reload(gui)
+    imp.reload(interface)
+    imp.reload(files)
+    imp.reload(operators)
+    imp.reload(persistence)
+
+except:
+    from . import ressources 
+    from . import gui
+    from . import interface
+    from . import files
+    from . import operators
+    from . import persistence
 
 from pprint import pprint #Lib to print dictionnaries
 import addon_utils #utils to find addons path
@@ -40,6 +51,8 @@ import os.path            #Files functions of os lib
 from bpy.props import *   #Blender properties lib
 import sys                #System Libraries
 import json
+
+
 
 for x in range(len(addon_utils.paths())):
     appending = sys.path.append(addon_utils.paths()[x]+'/addon/python3x') #Appending naming libs
