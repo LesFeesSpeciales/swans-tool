@@ -143,8 +143,17 @@ def update_naming(self, context):
             y = (str(temp[i]),str(temp[i]),'')
             if y not in ressources.Items_asset:
                 ressources.Items_asset.append((str(temp[i]),str(temp[i]),''))
-        
         UpdateEnum('',ressources.Items_asset,'asset','','')
+    #Upgrade sequence
+    elif (bpy.context.scene.roots == 'MOVIE') and (bpy.context.scene.drives != 'none'):
+        temp = persistence.load_seq()
+        for i in range(len(temp)):
+            y = (str(temp[i]),str(temp[i]),'')
+            if y not in ressources.Items_seq:
+                ressources.Items_seq.append((str(temp[i]),str(temp[i]),''))
+        UpdateEnum('',ressources.Items_seq,'seq','','none')
+
+    
 
 
     #path['Version'] = 'v00'    
@@ -170,10 +179,10 @@ def update_naming(self, context):
 #...................................
 def UpdateEnum(Enums,Items,Name,Description,Defaults):
     print("update file list")
+    print('updating:'+Name)   
     print('name:'+Name+' Description:'+Description)
     print('Items:'+str(tuple(Items)))
     if Name == 'Store': 
-        print('updating:'+Name)   
         bpy.types.Scene.drives= EnumProperty(
             name=Name,
             description=Description,
@@ -188,9 +197,6 @@ def UpdateEnum(Enums,Items,Name,Description,Defaults):
             default='none',
             update=update_naming)
     elif Name == 'seq':
-        print('ITEEM:')
-        print(Items)
-        print('END')
         bpy.types.Scene.seq= EnumProperty(
             name=Name,
             description=Description,

@@ -118,3 +118,39 @@ def load_asset():
 
 
     return asset
+
+#...................................
+#         load_sequences           #
+#                                  #
+#   load assets from directory     #
+#...................................
+def load_seq():
+    print('Load seq from files')
+
+    #list subdir from libs dir
+    if sys.platform != 'win32':  
+        root = bpy.context.scene.drives + ressources.path['Film']+'/'
+    else:
+        root = bpy.context.scene.drives + ressources.path['Film']+'\\'
+    print('root:'+root)
+
+    if os.path.isdir(root):
+        seq = []
+
+        a = files.listdirs(root)
+        print(a)
+        for x in range(len(a)):
+            if sys.platform != 'win32':   
+                if a[x].split('/')[len(a[x].split('/'))-1] not in seq:
+                    seq.append(a[x].split('/')[len(a[x].split('/'))-1])
+            else:
+                if a[x].split('\\')[len(a[x].split('\\'))-1] not in seq:
+                    seq.append(a[x].split('\\')[len(a[x].split('\\'))-1])
+        print("SEQUENCE:")
+        print(seq)
+
+    else:
+        seq.append('none')
+
+
+    return seq
