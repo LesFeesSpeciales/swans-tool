@@ -206,9 +206,10 @@ class add_asset(bpy.types.Operator):
     add = bpy.props.StringProperty() # defining the property
 
     def execute(self, context):
-
+        #ASSET--------------------------------------------------
         if self.add == 'asset':
             interface.update_naming(self,context)
+        #SQUENCE------------------------------------------------
         elif self.add == 'seq':
             #increase the seq
             ressources.command.append("add a sequence")
@@ -239,6 +240,37 @@ class add_asset(bpy.types.Operator):
 
             ressources.Items_seq.append((str(max),str(max),''))
             interface.UpdateEnum('',ressources.Items_seq,'seq',max,max)
+        #SHOT------------------------------------------------------------
+        elif self.add == 'shot':
+            #increase the seq
+            ressources.command.append("add a shot")
+            max = 0
+            num_shot = ""
+            n_num_shot = 0
+
+            for i in range(len(ressources.Items_shot)):
+                if ressources.Items_shot[i][0]!='none':
+                    for z in range(1,len(ressources.Items_shot[i][0])):
+                        num_shot = num_shot + ressources.Items_shot[i][0][z]
+                    n_num_shot = int(num_shot)
+                    print('MAXXX:'+num_shot)
+                    print
+                    if n_num_shot>=max:
+                        print('MAXXX:'+str(max))
+                        max = n_num_shot
+                        print('MAX:'+str(max))
+                    num_shot = ""
+                
+            max = max + 1
+            max = str(max)
+
+            while len(max) < 3:
+                max = '0'+max
+                    
+            max = 'P'+max
+
+            ressources.Items_shot.append((str(max),str(max),''))
+            interface.UpdateEnum('',ressources.Items_shot,'shot',max,max)
         return {"FINISHED"}
 
 

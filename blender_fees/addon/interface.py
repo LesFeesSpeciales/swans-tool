@@ -203,4 +203,12 @@ def UpdateEnum(Enums,Items,Name,Description,Defaults):
             items=tuple(Items),
             default=Defaults,
             update=update_naming)
+    elif Name == 'shot':
+        bpy.types.Scene.shot = EnumProperty(
+            name=Name,
+            description=Description,
+            items=tuple(Items),
+            default=Defaults,
+            update=update_naming)
+
         
