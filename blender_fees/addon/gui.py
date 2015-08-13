@@ -62,6 +62,12 @@ class CustomProp(bpy.types.PropertyGroup):
                 GUI CREATION
 
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>''' 
+def enable(x):
+    if bpy.context.scene.drives == 'none':
+        x.enabled = False
+    else:
+        x.enabled=True
+
 class naming_panel(bpy.types.Panel):
     bl_label = "Files Tools"
     bl_space_type = 'VIEW_3D'
@@ -113,15 +119,17 @@ class naming_panel(bpy.types.Panel):
             
             #=============================================================
             row = box.row()
-                
+
+            enable(row)
+
             row.prop(context.scene, "roots", expand=True)
 
             ''' IF MOVIE'''
-            if scn.roots == 'MOVIE':         
+            if scn.roots == 'MOVIE':  
                 row = box.row()
                 box = row.box()
                 row = box.row(align=True)
- 
+                
                 
                 #SEQ=============================================
                 if(scn.seq=='none'):
@@ -136,9 +144,11 @@ class naming_panel(bpy.types.Panel):
                 col = split.column()   
                 sub = col.column(align=True)
                 subrow = sub.row(align=True)
+
+                enable(subrow)
+
                 subrow.prop(scn, "seq",expand=False,text='')
                 subrow.operator("scene.add_asset",text="", icon='PLUS').add = 'seq'
-
                 #row = box.row()
                 
                 if scn.seq == 'NEW':
@@ -159,6 +169,7 @@ class naming_panel(bpy.types.Panel):
                 col = split.column()   
                 sub = col.column(align=True)
                 subrow = sub.row(align=True)
+                enable(subrow)
                 subrow.prop(scn, "shot",expand=False,text='')
                 subrow.operator("scene.add_asset",text="", icon='PLUS').add = 'shot'
                 #row = box.row()
@@ -182,7 +193,7 @@ class naming_panel(bpy.types.Panel):
                     row.label(text=" FAMILY",icon='FILE_TICK')
                 row = box.row(align=True)     
                 
-                
+                enable(row)
                 row.prop(scn,"famille",expand=True,icon_value=4)
                 row = box.row()
                 
@@ -197,6 +208,7 @@ class naming_panel(bpy.types.Panel):
                     col.label(text=" ASSET",icon='FILE_TICK')
                 #col.row(align=True)
                 sub = col.column(align=True)
+                enable(sub)
                 sub.prop(scn, "asset",expand=False,text='')
                 if scn.asset == 'other':
                   subrow = sub.row(align=True)
@@ -208,13 +220,14 @@ class naming_panel(bpy.types.Panel):
             #dpt setting----------------------------------
             split = row.split(align=True)
             col = split.column()
-
+           
             if(scn.dpt=='none'):
                 col.label(text=" DPT",icon='QUESTION')
             else:
                 col.label(text=" DPT",icon='FILE_TICK')
             
             sub = col.column(align=True)
+            enable(sub)
             sub.prop(scn, "dpt",expand=False,text='')
      
             row = box.row()        
@@ -228,7 +241,7 @@ class naming_panel(bpy.types.Panel):
             #Operator OPEN/NEW/SAVE AS--------------------------
             row.alignment='CENTER'
             row.scale_y=1.5
-            
+            enable(row)
             row.operator("scene.file_op",text="NEW",emboss=True,icon='FILE').action = "NEW" 
             row.operator("scene.file_op",text="SAVE AS",emboss=True,icon='PASTEDOWN').action = "SAVE_AS" 
             row.operator("scene.file_op",text="OPEN",emboss=True,icon='COPYDOWN').action = "OPEN"
