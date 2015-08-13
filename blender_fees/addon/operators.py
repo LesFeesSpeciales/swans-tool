@@ -240,6 +240,8 @@ class add_asset(bpy.types.Operator):
 
             ressources.Items_seq.append((str(max),str(max),''))
             interface.UpdateEnum('',ressources.Items_seq,'seq',max,max)
+            bpy.context.scene.seq = max
+
         #SHOT------------------------------------------------------------
         elif self.add == 'shot':
             #increase the seq
@@ -271,6 +273,7 @@ class add_asset(bpy.types.Operator):
 
             ressources.Items_shot.append((str(max),str(max),''))
             interface.UpdateEnum('',ressources.Items_shot,'shot',max,max)
+            bpy.context.scene.shot = max
         return {"FINISHED"}
 
 
