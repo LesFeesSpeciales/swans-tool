@@ -18,7 +18,7 @@
 # See blender --help for details.
 
 import bpy
-import os, time
+import os, time, json
 
 
 
@@ -363,66 +363,67 @@ def main():
 
     usage_text = \
     """Select images to add to sequence and arguments for metadata"""
-      # stamp.py --background --python """ + os.path.basename(__file__) + """ -- [options]"""
 
-    parser = argparse.ArgumentParser(description=usage_text, prog="python stamp.py")
+    parser = argparse.ArgumentParser(description=usage_text, prog="python stamp.py", conflict_handler='resolve')#, add_help=False)
 
-    # Example utility, add some text and renders or saves it (with options)
-    # Possible types are: string, int, long, choice, float and complex.
     parser.add_argument("image", nargs='+', type=str, help="Path to an image")
-
-    # parser.add_argument("-t", "--text", dest="text",
-    #         help="Text to write")
 
     parser.add_argument("-o", "--out", dest="render_dir", metavar='PATH',
             help="Render sequence to the specified path")
 
+    parser.add_argument("-t", "--template", dest="template", metavar='TEMPLATE',
+            help="Template file")
 
-    metas = [
-        ["date",       "-d", "--date",       "Date of creation"],
-        ["author",     "-a", "--author",     "Author"],
-        ["project",    "-p", "--project",    "Project"],
-        ["shot",       "-s", "--shot",       "Shot"],
-        ["sequence",   "-S", "--sequence",   "Sequence"],
-        ["focal",      "-f", "--focal",      "Focal"],
-        ["rendertime", "-r", "--rendertime", "Render time"],
-        ["text",       "-t", "--text",       "Custom text"]
-    ]
-
-    for m in metas:
-        parser.add_argument(m[1], m[2], dest=m[0],
-            help=m[3])
 
     print('\n')
-    args = parser.parse_args(argv)  # In this example we wont use the args
+    print('BEFORE')
+    args, u_args = parser.parse_known_args(argv)  # In this example we wont use the args
+    print('AFTER')
 
-    if not argv:
-        parser.print_help()
-        return
+    ### parse metadata
+    if args.template:
+        with open(args.template, 'r') as f:
+             template_args = f.read()
+             template_args = (json.loads(template_args))
 
-    if not args.image:
-        print("Error: image argument not given, aborting.")
-        parser.print_help()
+        parser_with_template = argparse.ArgumentParser(parents=[parser])
+
+        for arg in template_args:
+
+            parser_with_template.add_argument('-{}'.format(arg["field"][0].lower()), '--{}'.format(arg["field"].lower()), dest=arg["field"].lower(),
+                help=arg["field"])
+
+        args = parser_with_template.parse_args(argv)
+
+        # if "help" in args:
+        #     parser_with_template.print_help()
+        # else:
+        #     print("FUCKYOU")
+
+
+    if not argv or not args.image:
+        parser_no_template = argparse.ArgumentParser(parents=[parser])
+        parser_no_template.print_help()
         return
 
     # Default render dir
     if not args.render_dir:
         args.render_dir = os.path.dirname(args.image[0]) + os.path.sep
 
-    ### TODO: parse metadata
+
     default_meta = {
         'position': 'BOTTOM-LEFT',
         'field': 'Field',
         'value': 'Value',
         'color': [1.0, 1.0, 1.0], 
         'size': 10,
-        'inline': False
+        'inline': True
     }
 
-    print(type(vars(args)))
 
     for k, v in vars(args).items():
         print('{:<15} : {}'.format(k,v))
+
 
     metadata = \
     [
@@ -460,9 +461,11 @@ def main():
         }
     ]
 
-    stamp = Render_stamp(metadata, args.image, args.render_dir)
-    # render_stamp(args.image, args.text, args.render_dir)
-    print("batch job finished, exiting")
+
+
+    # stamp = Render_stamp(metadata, args.image, args.render_dir)
+    # # render_stamp(args.image, args.text, args.render_dir)
+    # print("batch job finished, exiting")
 
 
 
