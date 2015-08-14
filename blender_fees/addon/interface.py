@@ -35,7 +35,6 @@ for x in range(len(addon_utils.paths())):
     print(appending)
 import naming.Herakles as naming   #Import naming 
 
-
 '''-----------------------------------------------
 
          INTERFACE NAMING/SCRIPT FUNCTIONS 
