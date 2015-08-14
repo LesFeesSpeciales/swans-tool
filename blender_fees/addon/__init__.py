@@ -178,44 +178,7 @@ def initSceneProperties():
                ('Shad', "Shad", "")),
         default='none',
         update = interface.update_naming) 
-     #SEQUENCE------------------------------->
-     #bpy.types.Scene.seq = EnumProperty(
-     #   name="type",
-     #   description="/movie/seq",
-     #   items=(('none', "none", ""),
-     #          ('S001', "S001", ""),
-     #          ('S002', "S002", ""),
-     #          ('S004', "S004", ""),
-     #          ('S005', "S005", ""),
-     #          ('S006', "S006", ""),
-     #          ('S007', "S007", ""),
-     #          ('S008', "S008", ""),
-     #          ('S009', "S009", ""),
-     #          ('S010', "S010", ""),
-     #          ('S011', "S011", ""),
-     #          ('S012', "S012", "")),
-     #   default='none',
-     #   update = interface.update_naming)
-     #SHOT------------------------------------>
-     #bpy.types.Scene.shot = EnumProperty(
-     #   name="type",
-     #   description="/movie/seq/shot",
-     #   items=(('none', "none", ""),
-     #          ('P001', "P001", ""),
-     #          ('P002', "P002", ""),
-     #          ('P003', "P003", ""),
-     #          ('P004', "P004", ""),
-     #          ('P005', "P005", ""),
-     #          ('P006', "P006", ""),
-     #          ('P007', "P007", ""),
-     #          ('P008', "P008", ""),
-     #          ('P009', "P009", ""),
-     #          ('P010', "P010", ""),
-     #          ('P011', "P011", ""),
-     #          ('P012', "P012", "")),
-     #   default='none',
-     #   update = interface.update_naming) 
-     #Strings props---------------------------->
+
      bpy.types.Scene.newF = StringProperty(
         name="",
         subtype = 'FILE_NAME',
