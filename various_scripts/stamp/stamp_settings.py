@@ -19,7 +19,7 @@
 
 import bpy
 import os, time, json
-
+from pprint import pprint
 
 
 ### UTILS
@@ -364,7 +364,7 @@ def main():
     usage_text = \
     """Select images to add to sequence and arguments for metadata"""
 
-    parser = argparse.ArgumentParser(description=usage_text, prog="python stamp.py", conflict_handler='resolve', add_help=False)
+    parser = argparse.ArgumentParser(description=usage_text, prog="python stamp.py", epilog="ZIIIB", conflict_handler='resolve', add_help=False)
 
     parser.add_argument("-o", "--out", dest="render_dir", metavar='PATH',
             help="Render sequence to the specified path")
@@ -372,14 +372,9 @@ def main():
     parser.add_argument("-t", "--template", dest="template", metavar='TEMPLATE',
             help="Template file")
 
-    # if '-t' in argv or '--template' in argv:
-    #     a = '-t' if '-t' in argv else '--template'
-    #     i = argv.index(a)
-    #     template_path = argv[i+1]
-
     # print('\n')
     # print('BEFORE')
-    args, u_args = parser.parse_known_args(argv)  # In this example we wont use the args
+    args, u_args = parser.parse_known_args(argv)
     # print('AFTER')
 
     ### parse metadata
@@ -388,7 +383,7 @@ def main():
              template_args = f.read()
              template_args = (json.loads(template_args))
 
-        parser = argparse.ArgumentParser(parents=[parser])
+        parser = argparse.ArgumentParser(parents=[parser], description=usage_text, epilog="-----"*3)
 
         parser.add_argument("image", nargs='+', type=str, help="Path to an image")
 
@@ -400,12 +395,32 @@ def main():
 
         args = parser.parse_args(argv)
 
-        if not (args.image or u_args.image):
-        # if "help" in args or not args.image:
-            parser.print_help()
+        # if not (args.image or u_args.image):
+        # # if "help" in args or not args.image:
+        #     parser.print_help()
+
+        for arg in template_args[:]:
+            # print(arg)
+
+            arg_key = arg["field"].lower()
+            if hasattr(args, arg_key):
+                arg_value = getattr(args, arg_key)
+                if arg_value is not None:
+                    print (arg_key, ":", arg_value)
+                else:
+                    print(arg, 'JUST POPPED')
+                    template_args.remove(arg)
+
+            else:
+                print(arg_key, "missing from args")
+
+        print("\nTEMPLATE_ARGS")
+        pprint(template_args)
+        metadata = template_args
+
 
     else:
-        parser = argparse.ArgumentParser(parents=[parser])
+        parser = argparse.ArgumentParser(parents=[parser], description=usage_text, epilog="-----"*3)
 
         parser.add_argument("image", nargs='+', type=str, help="Path to an image")
         
@@ -426,8 +441,8 @@ def main():
     }
 
 
-    for k, v in vars(args).items():
-        print('{:<15} : {}'.format(k,v))
+    # for k, v in vars(args).items():
+    #     print('{:<15} : {}'.format(k,v))
 
 
     # metadata = \
@@ -468,7 +483,7 @@ def main():
 
 
 
-    # stamp = Render_stamp(metadata, args.image, args.render_dir)
+    stamp = Render_stamp(metadata, args.image, args.render_dir)
     # # render_stamp(args.image, args.text, args.render_dir)
     # print("batch job finished, exiting")
 
