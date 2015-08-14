@@ -41,10 +41,22 @@
         "size": 15,
         "color": [
             0.0,
-            1.0,
+            0.0,
             0.0
         ],
         "inline": true,
+        "field": "Timecode"
+    },
+    {
+        "position": "TOP-LEFT",
+        "value": null,
+        "size": 15,
+        "color": [
+            0.0,
+            1.0,
+            0.0
+        ],
+        "inline": false,
         "field": "Date"
     }
 ]
