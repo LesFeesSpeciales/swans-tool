@@ -18,7 +18,7 @@
 # See blender --help for details.
 
 import bpy
-import os, time
+import os, time, json
 
 
 
@@ -363,106 +363,114 @@ def main():
 
     usage_text = \
     """Select images to add to sequence and arguments for metadata"""
-      # stamp.py --background --python """ + os.path.basename(__file__) + """ -- [options]"""
 
-    parser = argparse.ArgumentParser(description=usage_text, prog="python stamp.py")
-
-    # Example utility, add some text and renders or saves it (with options)
-    # Possible types are: string, int, long, choice, float and complex.
-    parser.add_argument("image", nargs='+', type=str, help="Path to an image")
-
-    # parser.add_argument("-t", "--text", dest="text",
-    #         help="Text to write")
+    parser = argparse.ArgumentParser(description=usage_text, prog="python stamp.py", conflict_handler='resolve', add_help=False)
 
     parser.add_argument("-o", "--out", dest="render_dir", metavar='PATH',
             help="Render sequence to the specified path")
 
+    parser.add_argument("-t", "--template", dest="template", metavar='TEMPLATE',
+            help="Template file")
 
-    metas = [
-        ["date",       "-d", "--date",       "Date of creation"],
-        ["author",     "-a", "--author",     "Author"],
-        ["project",    "-p", "--project",    "Project"],
-        ["shot",       "-s", "--shot",       "Shot"],
-        ["sequence",   "-S", "--sequence",   "Sequence"],
-        ["focal",      "-f", "--focal",      "Focal"],
-        ["rendertime", "-r", "--rendertime", "Render time"],
-        ["text",       "-t", "--text",       "Custom text"]
-    ]
+    # if '-t' in argv or '--template' in argv:
+    #     a = '-t' if '-t' in argv else '--template'
+    #     i = argv.index(a)
+    #     template_path = argv[i+1]
 
-    for m in metas:
-        parser.add_argument(m[1], m[2], dest=m[0],
-            help=m[3])
+    # print('\n')
+    # print('BEFORE')
+    args, u_args = parser.parse_known_args(argv)  # In this example we wont use the args
+    # print('AFTER')
 
-    print('\n')
-    args = parser.parse_args(argv)  # In this example we wont use the args
+    ### parse metadata
+    if args.template:
+        with open(args.template, 'r') as f:
+             template_args = f.read()
+             template_args = (json.loads(template_args))
 
-    if not argv:
-        parser.print_help()
-        return
+        parser = argparse.ArgumentParser(parents=[parser])
 
-    if not args.image:
-        print("Error: image argument not given, aborting.")
-        parser.print_help()
-        return
+        parser.add_argument("image", nargs='+', type=str, help="Path to an image")
+
+
+        for arg in template_args:
+
+            parser.add_argument('-{}'.format(arg["field"][0].lower()), '--{}'.format(arg["field"].lower()), dest=arg["field"].lower(),
+                help=arg["field"])
+
+        args = parser.parse_args(argv)
+
+        if not (args.image or u_args.image):
+        # if "help" in args or not args.image:
+            parser.print_help()
+
+    else:
+        parser = argparse.ArgumentParser(parents=[parser])
+
+        parser.add_argument("image", nargs='+', type=str, help="Path to an image")
+        
+        args = parser.parse_args(argv)
 
     # Default render dir
     if not args.render_dir:
         args.render_dir = os.path.dirname(args.image[0]) + os.path.sep
 
-    ### TODO: parse metadata
+
     default_meta = {
         'position': 'BOTTOM-LEFT',
         'field': 'Field',
         'value': 'Value',
         'color': [1.0, 1.0, 1.0], 
         'size': 10,
-        'inline': False
+        'inline': True
     }
 
-    print(type(vars(args)))
 
     for k, v in vars(args).items():
         print('{:<15} : {}'.format(k,v))
 
-    metadata = \
-    [
-        {
-            'position': 'BOTTOM-LEFT',
-            'field': 'Séquence',
-            'value': 'S001',
-            'color': [1.0, 0.0, 0.0], 
-            'size': 15,
-            'inline': False
-        },
-        {
-            'position': 'BOTTOM-LEFT',
-            'field': 'Plan',
-            'value': 'P02',
-            'color': [0.0, 0.0, 1.0], 
-            'size': 15,
-            'inline': True
-        },
-        {
-            'position': 'BOTTOM-LEFT',
-            'field': 'Frame',
-            'value': None,
-            'color': [0.0, 0.0, 1.0], 
-            'size': 15,
-            'inline': False
-        },
-        {
-            'position': 'BOTTOM-LEFT',
-            'field': 'Date',
-            'value': None,
-            'color': [0.0, 1.0, 0.0], 
-            'size': 15,
-            'inline': True
-        }
-    ]
 
-    stamp = Render_stamp(metadata, args.image, args.render_dir)
-    # render_stamp(args.image, args.text, args.render_dir)
-    print("batch job finished, exiting")
+    # metadata = \
+    # [
+    #     {
+    #         'position': 'BOTTOM-LEFT',
+    #         'field': 'Séquence',
+    #         'value': 'S001',
+    #         'color': [1.0, 0.0, 0.0], 
+    #         'size': 15,
+    #         'inline': False
+    #     },
+    #     {
+    #         'position': 'BOTTOM-LEFT',
+    #         'field': 'Plan',
+    #         'value': 'P02',
+    #         'color': [0.0, 0.0, 1.0], 
+    #         'size': 15,
+    #         'inline': True
+    #     },
+    #     {
+    #         'position': 'BOTTOM-LEFT',
+    #         'field': 'Frame',
+    #         'value': None,
+    #         'color': [0.0, 0.0, 1.0], 
+    #         'size': 15,
+    #         'inline': False
+    #     },
+    #     {
+    #         'position': 'BOTTOM-LEFT',
+    #         'field': 'Date',
+    #         'value': None,
+    #         'color': [0.0, 1.0, 0.0], 
+    #         'size': 15,
+    #         'inline': True
+    #     }
+    # ]
+
+
+
+    # stamp = Render_stamp(metadata, args.image, args.render_dir)
+    # # render_stamp(args.image, args.text, args.render_dir)
+    # print("batch job finished, exiting")
 
 
 
