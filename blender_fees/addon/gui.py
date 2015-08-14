@@ -274,8 +274,7 @@ class naming_panel(bpy.types.Panel):
                     box2.label(text=">> "+ressources.command[i])
                     box2.scale_y=0.3
                     box2=box.row()
-
-    
+  
 def register():
 
     bpy.types.Scene.custom = CollectionProperty(type=CustomProp)

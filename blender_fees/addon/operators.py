@@ -276,7 +276,6 @@ class add_asset(bpy.types.Operator):
             bpy.context.scene.shot = max
         return {"FINISHED"}
 
-
 '''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
                 OPEN DIR OPERATOR
@@ -320,9 +319,7 @@ class OBJECT_OT_custompath(bpy.types.Operator):
     def invoke(self, context, event):
         wm = context.window_manager
         wm.fileselect_add(self)
-        return {'RUNNING_MODAL'}
-
-        
+        return {'RUNNING_MODAL'}      
 
 def register():
     bpy.utils.register_class(DialogOperator)

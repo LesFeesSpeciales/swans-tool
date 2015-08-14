@@ -222,7 +222,6 @@ def register():
     bpy.utils.register_module(__name__)
     gui.register()
    
-
 def unregister():   
     bpy.utils.unregister_module(__name__)
     gui.unregister()

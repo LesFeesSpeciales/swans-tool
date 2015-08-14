@@ -1,4 +1,4 @@
-'''
+﻿'''
 Copyright (C) 2015 LES FEES SPECIALES
 
 Created by LES FEES SPECIALES
@@ -112,6 +112,7 @@ def isfolder(name):
         return True
     else:
         return False
+
 #...................................
 #         List directories         #
 #...................................               
@@ -125,7 +126,8 @@ def listdir(root):
             tmp.type = 'F' 
         tmp.hide = False  
         tmp.name= buffer[i]   
-        folders.append(tmp)           
+        folders.append(tmp)         
+          
 #...................................
 #         List files               #
 #...................................
