@@ -146,7 +146,7 @@ def update_naming(self, context):
                 ressources.Items_asset.append((str(temps[i]),str(temps[i]),''))
         UpdateEnum('',ressources.Items_asset,'asset','','')
     #Upgrade sequence
-    elif (bpy.context.scene.roots == 'MOVIE') and (bpy.context.scene.drives != 'none'):
+    elif (bpy.context.scene.roots == 'MOVIE') and (bpy.context.scene.drives != 'none') and (temp['Dept'] == ressources.path['Dept']) and ('Shot' in temp) and ('Sequence' in temp):
         temps = persistence.load_seq()
         for i in range(len(temps)):
             y = (str(temps[i]),str(temps[i]),'')
@@ -155,6 +155,7 @@ def update_naming(self, context):
                 change = True
         if change:
             UpdateEnum('',ressources.Items_seq,'seq','','none')
+            bpy.context.scene.shot = ressources.Items_shot[0][0] 
         elif temp['Shot'] == bpy.context.scene.shot:
             temps = persistence.load_shots()
             ressources.Items_shot.clear()
@@ -163,7 +164,7 @@ def update_naming(self, context):
                 y = (str(temps[i]),str(temps[i]),'')
                 if y not in ressources.Items_shot:
                     ressources.Items_shot.append((str(temps[i]),str(temps[i]),''))
-            UpdateEnum('',ressources.Items_shot,'shot','','none')    
+            UpdateEnum('',ressources.Items_shot,'shot','','none') 
     
     change=False
 
