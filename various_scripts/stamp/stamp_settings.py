@@ -364,9 +364,7 @@ def main():
     usage_text = \
     """Select images to add to sequence and arguments for metadata"""
 
-    parser = argparse.ArgumentParser(description=usage_text, prog="python stamp.py", conflict_handler='resolve')#, add_help=False)
-
-    parser.add_argument("image", nargs='+', type=str, help="Path to an image")
+    parser = argparse.ArgumentParser(description=usage_text, prog="python stamp.py", conflict_handler='resolve', add_help=False)
 
     parser.add_argument("-o", "--out", dest="render_dir", metavar='PATH',
             help="Render sequence to the specified path")
@@ -374,11 +372,15 @@ def main():
     parser.add_argument("-t", "--template", dest="template", metavar='TEMPLATE',
             help="Template file")
 
+    # if '-t' in argv or '--template' in argv:
+    #     a = '-t' if '-t' in argv else '--template'
+    #     i = argv.index(a)
+    #     template_path = argv[i+1]
 
-    print('\n')
-    print('BEFORE')
+    # print('\n')
+    # print('BEFORE')
     args, u_args = parser.parse_known_args(argv)  # In this example we wont use the args
-    print('AFTER')
+    # print('AFTER')
 
     ### parse metadata
     if args.template:
@@ -386,25 +388,28 @@ def main():
              template_args = f.read()
              template_args = (json.loads(template_args))
 
-        parser_with_template = argparse.ArgumentParser(parents=[parser])
+        parser = argparse.ArgumentParser(parents=[parser])
+
+        parser.add_argument("image", nargs='+', type=str, help="Path to an image")
+
 
         for arg in template_args:
 
-            parser_with_template.add_argument('-{}'.format(arg["field"][0].lower()), '--{}'.format(arg["field"].lower()), dest=arg["field"].lower(),
+            parser.add_argument('-{}'.format(arg["field"][0].lower()), '--{}'.format(arg["field"].lower()), dest=arg["field"].lower(),
                 help=arg["field"])
 
-        args = parser_with_template.parse_args(argv)
+        args = parser.parse_args(argv)
 
-        # if "help" in args:
-        #     parser_with_template.print_help()
-        # else:
-        #     print("FUCKYOU")
+        if not (args.image or u_args.image):
+        # if "help" in args or not args.image:
+            parser.print_help()
 
+    else:
+        parser = argparse.ArgumentParser(parents=[parser])
 
-    if not argv or not args.image:
-        parser_no_template = argparse.ArgumentParser(parents=[parser])
-        parser_no_template.print_help()
-        return
+        parser.add_argument("image", nargs='+', type=str, help="Path to an image")
+        
+        args = parser.parse_args(argv)
 
     # Default render dir
     if not args.render_dir:
@@ -425,41 +430,41 @@ def main():
         print('{:<15} : {}'.format(k,v))
 
 
-    metadata = \
-    [
-        {
-            'position': 'BOTTOM-LEFT',
-            'field': 'Séquence',
-            'value': 'S001',
-            'color': [1.0, 0.0, 0.0], 
-            'size': 15,
-            'inline': False
-        },
-        {
-            'position': 'BOTTOM-LEFT',
-            'field': 'Plan',
-            'value': 'P02',
-            'color': [0.0, 0.0, 1.0], 
-            'size': 15,
-            'inline': True
-        },
-        {
-            'position': 'BOTTOM-LEFT',
-            'field': 'Frame',
-            'value': None,
-            'color': [0.0, 0.0, 1.0], 
-            'size': 15,
-            'inline': False
-        },
-        {
-            'position': 'BOTTOM-LEFT',
-            'field': 'Date',
-            'value': None,
-            'color': [0.0, 1.0, 0.0], 
-            'size': 15,
-            'inline': True
-        }
-    ]
+    # metadata = \
+    # [
+    #     {
+    #         'position': 'BOTTOM-LEFT',
+    #         'field': 'Séquence',
+    #         'value': 'S001',
+    #         'color': [1.0, 0.0, 0.0], 
+    #         'size': 15,
+    #         'inline': False
+    #     },
+    #     {
+    #         'position': 'BOTTOM-LEFT',
+    #         'field': 'Plan',
+    #         'value': 'P02',
+    #         'color': [0.0, 0.0, 1.0], 
+    #         'size': 15,
+    #         'inline': True
+    #     },
+    #     {
+    #         'position': 'BOTTOM-LEFT',
+    #         'field': 'Frame',
+    #         'value': None,
+    #         'color': [0.0, 0.0, 1.0], 
+    #         'size': 15,
+    #         'inline': False
+    #     },
+    #     {
+    #         'position': 'BOTTOM-LEFT',
+    #         'field': 'Date',
+    #         'value': None,
+    #         'color': [0.0, 1.0, 0.0], 
+    #         'size': 15,
+    #         'inline': True
+    #     }
+    # ]
 
 
 
