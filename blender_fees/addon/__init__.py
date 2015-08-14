@@ -1,4 +1,4 @@
-bl_info = {
+﻿bl_info = {
     "name": "Les Fees Speciales",
     "author":"Les Fees Speciales",
     "version":(1,0),
@@ -26,12 +26,23 @@ Created by LES FEES SPECIALES
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-from . import ressources 
-from . import gui
-from . import interface
-from . import files
-from . import operators
-from . import persistence
+import imp
+
+try:
+    imp.reload(ressources)
+    imp.reload(gui)
+    imp.reload(interface)
+    imp.reload(files)
+    imp.reload(operators)
+    imp.reload(persistence)
+
+except:
+    from . import ressources 
+    from . import gui
+    from . import interface
+    from . import files
+    from . import operators
+    from . import persistence
 
 from pprint import pprint #Lib to print dictionnaries
 import addon_utils #utils to find addons path
@@ -40,6 +51,8 @@ import os.path            #Files functions of os lib
 from bpy.props import *   #Blender properties lib
 import sys                #System Libraries
 import json
+
+
 
 for x in range(len(addon_utils.paths())):
     appending = sys.path.append(addon_utils.paths()[x]+'/addon/python3x') #Appending naming libs
@@ -65,12 +78,17 @@ property = []#contain all props in a near futur.....
 
 #-----NAMING VARS-------
 drives = (('Store',"Store directory",''),('/u/Project/',"/u/Project/",''),('test2_1',"test2_2",''),('',"",''))
-asset = (('asset',"/lib/type/famille/asse",''),('criquet', "criquet", ""),('plantes', "plantes", ""),('arbres', "arbres", ""),('shader', "shader", ""),('other', "other", ""))
+asset = (('asset',"/lib/type/famille/asset",''),('criquet', "criquet", ""),('plantes', "plantes", ""),('arbres', "arbres", ""),('other', "other", ""))
+seq = (('seq',"sequence",''),('S001',"S001",''),('S002',"S002",''))
+shot = (('shot',"shot",''),('P001',"P001",''),('P002',"P002",''))
+
 is_wild = 'True'
 
-#adding ))
+#adding 
 property.append(drives)
 property.append(asset)
+property.append(seq)
+property.append(shot)
       
 #...................................
 #         initSceneProperties      #
@@ -81,10 +99,15 @@ def initSceneProperties():
      #PROJECT DIR----------------------------->
      bpy.types.Scene.drives = EnumProperty(name="none",description="none",items=(('')),update=interface.update_naming)
      bpy.types.Scene.asset = EnumProperty(name="none",description="none",items=(('')))
+     bpy.types.Scene.seq = EnumProperty(name="none", description="none", items=(('')), update = interface.update_naming)
+     bpy.types.Scene.shot = EnumProperty(name="none", description="none", items=(('')), update = interface.update_naming) 
+     
      s = len(property)
      
      ressources.Items.append(('none',"none",""))
      ressources.Items_asset.append(('none',"none",""))
+     ressources.Items_seq.append(('none',"none",""))
+     ressources.Items_shot.append(('none',"none",""))
    
 
      for i in range(s):
@@ -93,9 +116,6 @@ def initSceneProperties():
             if not persistence.load_config():      
                 for line in range(1,len(property[i])):
                     ressources.Items.append((str(property[i][line][0]),str(property[i][line][1]),str(property[i][line][2])))         
-                    print('fill items..>')
-                    print(ressources.Items)
-            print(ressources.Items[0][0])
             interface.UpdateEnum(bpy.types.Scene,ressources.Items,property[i][0][0],property[i][0][1],ressources.Items[0][0])    
         
         #Setup assets
@@ -103,10 +123,22 @@ def initSceneProperties():
             for line in range(1,len(property[i])):
                 ressources.Items_asset.append((str(property[i][line][0]),str(property[i][line][1]),str(property[i][line][2])))         
                 print(ressources.Items_asset)
-            interface.UpdateEnum(bpy.types.Scene,tuple(ressources.Items_asset),property[i][0][0],property[i][0][1],ressources.Items_asset[0][0])
+            interface.UpdateEnum(bpy.types.Scene,ressources.Items_asset,property[i][0][0],property[i][0][1],ressources.Items_asset[0][0])
         
+        #Setup sequences
+        elif property[i][0][0] == 'seq':
+            for line in range(1,len(property[i])):
+                ressources.Items_seq.append((str(property[i][line][0]),str(property[i][line][1]),str(property[i][line][2])))         
+                print(ressources.Items_seq)
+            interface.UpdateEnum(bpy.types.Scene,ressources.Items_seq,property[i][0][0],property[i][0][1],ressources.Items_seq[0][0])
 
-
+         #Setup shots
+        elif property[i][0][0] == 'shot':
+            for line in range(1,len(property[i])):
+                ressources.Items_shot.append((str(property[i][line][0]),str(property[i][line][1]),str(property[i][line][2])))         
+                print(ressources.Items_shot)
+            interface.UpdateEnum(bpy.types.Scene.shot,ressources.Items_shot,property[i][0][0],property[i][0][1],ressources.Items_shot[0][0])
+     
      #ROOT----------------------------->
      bpy.types.Scene.roots = EnumProperty(
         name="Root",
@@ -146,43 +178,43 @@ def initSceneProperties():
                ('Shad', "Shad", "")),
         default='none',
         update = interface.update_naming) 
-      #SEQUENCE------------------------------->
-     bpy.types.Scene.seq = EnumProperty(
-        name="type",
-        description="/movie/seq",
-        items=(('none', "none", ""),
-               ('S001', "S001", ""),
-               ('S002', "S002", ""),
-               ('S004', "S004", ""),
-               ('S005', "S005", ""),
-               ('S006', "S006", ""),
-               ('S007', "S007", ""),
-               ('S008', "S008", ""),
-               ('S009', "S009", ""),
-               ('S010', "S010", ""),
-               ('S011', "S011", ""),
-               ('S012', "S012", "")),
-        default='none',
-        update = interface.update_naming)
+     #SEQUENCE------------------------------->
+     #bpy.types.Scene.seq = EnumProperty(
+     #   name="type",
+     #   description="/movie/seq",
+     #   items=(('none', "none", ""),
+     #          ('S001', "S001", ""),
+     #          ('S002', "S002", ""),
+     #          ('S004', "S004", ""),
+     #          ('S005', "S005", ""),
+     #          ('S006', "S006", ""),
+     #          ('S007', "S007", ""),
+     #          ('S008', "S008", ""),
+     #          ('S009', "S009", ""),
+     #          ('S010', "S010", ""),
+     #          ('S011', "S011", ""),
+     #          ('S012', "S012", "")),
+     #   default='none',
+     #   update = interface.update_naming)
      #SHOT------------------------------------>
-     bpy.types.Scene.shot = EnumProperty(
-        name="type",
-        description="/movie/seq/shot",
-        items=(('none', "none", ""),
-               ('P001', "P001", ""),
-               ('P002', "P002", ""),
-               ('P003', "P003", ""),
-               ('P004', "P004", ""),
-               ('P005', "P005", ""),
-               ('P006', "P006", ""),
-               ('P007', "P007", ""),
-               ('P008', "P008", ""),
-               ('P009', "P009", ""),
-               ('P010', "P010", ""),
-               ('P011', "P011", ""),
-               ('P012', "P012", "")),
-        default='none',
-        update = interface.update_naming) 
+     #bpy.types.Scene.shot = EnumProperty(
+     #   name="type",
+     #   description="/movie/seq/shot",
+     #   items=(('none', "none", ""),
+     #          ('P001', "P001", ""),
+     #          ('P002', "P002", ""),
+     #          ('P003', "P003", ""),
+     #          ('P004', "P004", ""),
+     #          ('P005', "P005", ""),
+     #          ('P006', "P006", ""),
+     #          ('P007', "P007", ""),
+     #          ('P008', "P008", ""),
+     #          ('P009', "P009", ""),
+     #          ('P010', "P010", ""),
+     #          ('P011', "P011", ""),
+     #          ('P012', "P012", "")),
+     #   default='none',
+     #   update = interface.update_naming) 
      #Strings props---------------------------->
      bpy.types.Scene.newF = StringProperty(
         name="",
@@ -192,15 +224,12 @@ def initSceneProperties():
         default= "")
      bpy.types.Scene.newA = StringProperty(
         name="",
-        subtype = 'FILE_NAME',
         description="new asset",
         maxlen= 50,
-        default= "",
-        update = interface.update_naming)
-     bpy.types.Scene.newD = StringProperty(
+        default= "")
+     bpy.types.Scene.newS = StringProperty(
         name="",
-        subtype = 'FILE_NAME',
-        description="new asset",
+        description="new sequence",
         maxlen= 50,
         default= "")
      #HIDING BOOLEANS------------------------->

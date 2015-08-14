@@ -1,4 +1,4 @@
-'''
+﻿'''
 Copyright (C) 2015 LES FEES SPECIALES
 
 Created by LES FEES SPECIALES
@@ -29,4 +29,6 @@ path={}
 #-----GENERAL VARS-------
 Items = []
 Items_asset = []
+Items_seq = []
+Items_shot = []
     

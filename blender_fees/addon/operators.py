@@ -1,4 +1,4 @@
-'''
+﻿'''
 Copyright (C) 2015 LES FEES SPECIALES
 
 Created by LES FEES SPECIALES
@@ -150,6 +150,7 @@ class file_op(bpy.types.Operator):
                     if os.path.isfile(addon_utils.paths()[x]+'/addon/base.blend'):
                         shutil.copyfile(addon_utils.paths()[x]+'/addon/base.blend',p) 
                         print("new file copied")
+
                         ressources.command.append("new file copied")
                         break
                     else:
@@ -168,6 +169,9 @@ class file_op(bpy.types.Operator):
                 if os.path.isfile(p):
                     ressources.command.append("opening file :"+str(p))
                     bpy.ops.wm.open_mainfile(filepath = p)
+                    #Refresh ans asset LIST UI List before breaking
+                    files.Update_ListFile(bpy.context.scene.newF)
+                    interface.UpdateEnum('',ressources.Items_asset,'asset','','')
                 else:
                     ressources.command.append("unknown directory :"+str(p))
             else:
@@ -189,6 +193,89 @@ class file_op(bpy.types.Operator):
             files.Update_ListFile(bpy.context.scene.newF)
             #__init__.update_naming(self,context)
         return {"FINISHED"}
+
+'''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+                AddAsset
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>''' 
+class add_asset(bpy.types.Operator):
+    bl_idname = "scene.add_asset"
+    bl_label = "add_asset"
+    
+    add = bpy.props.StringProperty() # defining the property
+
+    def execute(self, context):
+        #ASSET--------------------------------------------------
+        if self.add == 'asset':
+            interface.update_naming(self,context)
+        #SQUENCE------------------------------------------------
+        elif self.add == 'seq':
+            #increase the seq
+            ressources.command.append("add a sequence")
+            max = 0
+            num_seq = ""
+            n_num_seq = 0
+
+            for i in range(len(ressources.Items_seq)):
+                if ressources.Items_seq[i][0]!='none':
+                    for z in range(1,len(ressources.Items_seq[i][0])):
+                        num_seq = num_seq + ressources.Items_seq[i][0][z]
+                    n_num_seq = int(num_seq)
+                    print('MAXXX:'+num_seq)
+                    print
+                    if n_num_seq>=max:
+                        print('MAXXX:'+str(max))
+                        max = n_num_seq
+                        print('MAX:'+str(max))
+                    num_seq = ""
+                
+            max = max + 1
+            max = str(max)
+
+            while len(max) < 3:
+                max = '0'+max
+                    
+            max = 'S'+max
+
+            ressources.Items_seq.append((str(max),str(max),''))
+            interface.UpdateEnum('',ressources.Items_seq,'seq',max,max)
+            bpy.context.scene.seq = max
+
+        #SHOT------------------------------------------------------------
+        elif self.add == 'shot':
+            #increase the seq
+            ressources.command.append("add a shot")
+            max = 0
+            num_shot = ""
+            n_num_shot = 0
+
+            for i in range(len(ressources.Items_shot)):
+                if ressources.Items_shot[i][0]!='none':
+                    for z in range(1,len(ressources.Items_shot[i][0])):
+                        num_shot = num_shot + ressources.Items_shot[i][0][z]
+                    n_num_shot = int(num_shot)
+                    print('MAXXX:'+num_shot)
+                    print
+                    if n_num_shot>=max:
+                        print('MAXXX:'+str(max))
+                        max = n_num_shot
+                        print('MAX:'+str(max))
+                    num_shot = ""
+                
+            max = max + 1
+            max = str(max)
+
+            while len(max) < 3:
+                max = '0'+max
+                    
+            max = 'P'+max
+
+            ressources.Items_shot.append((str(max),str(max),''))
+            interface.UpdateEnum('',ressources.Items_shot,'shot',max,max)
+            bpy.context.scene.shot = max
+        return {"FINISHED"}
+
 
 '''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -240,9 +327,11 @@ class OBJECT_OT_custompath(bpy.types.Operator):
 def register():
     bpy.utils.register_class(DialogOperator)
     bpy.utils.register_class(file_op)
+    bpy.utils.register_class(add_asset)
     bpy.utils.register_class(OBJECT_OT_custompath)
 
 def unregister():
     bpy.utils.unregister_class(DialogOperator)
     bpy.utils.unregister_class(file_op)
+    bpy.utils.unregister_class(add_asset)
     bpy.utils.unregister_class(OBJECT_OT_custompath)

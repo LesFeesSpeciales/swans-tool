@@ -1,4 +1,4 @@
-'''
+﻿'''
 Copyright (C) 2015 LES FEES SPECIALES
 
 Created by LES FEES SPECIALES
@@ -104,11 +104,16 @@ def update_naming(self, context):
         ressources.path['Lib'] = 'LIB'
         ressources.path['Family']=bpy.context.scene.famille
         if bpy.context.scene.asset == 'other':
-            ressources.path['Asset']=bpy.context.scene.newA
-            ressources.Items_asset.append((str(bpy.context.scene.newA),str(bpy.context.scene.newA),''))
-            UpdateEnum('',ressources.Items_asset,'asset','','')
-            bpy.context.scene.asset = bpy.context.scene.newA
-
+            tempAsset = (str(bpy.context.scene.newA),str(bpy.context.scene.newA),'')
+            if tempAsset not in ressources.Items_asset:
+                ressources.path['Asset']=bpy.context.scene.newA
+                ressources.Items_asset.append((str(bpy.context.scene.newA),str(bpy.context.scene.newA),''))
+                UpdateEnum('',ressources.Items_asset,'asset','','')
+                bpy.context.scene.asset = bpy.context.scene.newA
+                #bpy.context.scene.newA ="none"
+            else:
+                bpy.context.scene.newA = ""
+          
         else:
             ressources.path['Asset']=bpy.context.scene.asset
         ressources.path['Dept']=bpy.context.scene.dpt
@@ -131,21 +136,38 @@ def update_naming(self, context):
         else:
             ressources.path['Version'] = 'v'+str(v)
 
+    change = False
     #Upgrade asset
     if (bpy.context.scene.famille != 'none') and (bpy.context.scene.roots != 'MOVIE') and (bpy.context.scene.drives != 'none'):
-        temp = persistence.load_asset()
-        for i in range(len(temp)):
-            y = (str(temp[i]),str(temp[i]),'')
+        temps = persistence.load_asset()
+        for i in range(len(temps)):
+            y = (str(temps[i]),str(temps[i]),'')
             if y not in ressources.Items_asset:
-                ressources.Items_asset.append((str(temp[i]),str(temp[i]),''))
-        
+                ressources.Items_asset.append((str(temps[i]),str(temps[i]),''))
         UpdateEnum('',ressources.Items_asset,'asset','','')
+    #Upgrade sequence
+    elif (bpy.context.scene.roots == 'MOVIE') and (bpy.context.scene.drives != 'none'):
+        temps = persistence.load_seq()
+        for i in range(len(temps)):
+            y = (str(temps[i]),str(temps[i]),'')
+            if y not in ressources.Items_seq:
+                ressources.Items_seq.append((str(temps[i]),str(temps[i]),''))
+                change = True
+        if change:
+            UpdateEnum('',ressources.Items_seq,'seq','','none')
+        elif temp['Shot'] == bpy.context.scene.shot:
+            temps = persistence.load_shots()
+            ressources.Items_shot.clear()
+            ressources.Items_shot.append(('none','none',''))
+            for i in range(len(temps)):
+                y = (str(temps[i]),str(temps[i]),'')
+                if y not in ressources.Items_shot:
+                    ressources.Items_shot.append((str(temps[i]),str(temps[i]),''))
+            UpdateEnum('',ressources.Items_shot,'shot','','none')    
+    
+    change=False
 
-
-    #path['Version'] = 'v00'    
     ressources.path['Extension'] = 'blend' 
-    #pprint(path)
-    #print('naming'+str(create_naming(self,context,'',ressources.path,ressources.command)))
     print('newwF:'+bpy.context.scene.newF)
     
     try:
@@ -165,10 +187,10 @@ def update_naming(self, context):
 #...................................
 def UpdateEnum(Enums,Items,Name,Description,Defaults):
     print("update file list")
+    print('updating:'+Name)   
     print('name:'+Name+' Description:'+Description)
     print('Items:'+str(tuple(Items)))
     if Name == 'Store': 
-        print('updating:'+Name)   
         bpy.types.Scene.drives= EnumProperty(
             name=Name,
             description=Description,
@@ -182,3 +204,19 @@ def UpdateEnum(Enums,Items,Name,Description,Defaults):
             items=tuple(Items),
             default='none',
             update=update_naming)
+    elif Name == 'seq':
+        bpy.types.Scene.seq= EnumProperty(
+            name=Name,
+            description=Description,
+            items=tuple(Items),
+            default=Defaults,
+            update=update_naming)
+    elif Name == 'shot':
+        bpy.types.Scene.shot = EnumProperty(
+            name=Name,
+            description=Description,
+            items=tuple(Items),
+            default=Defaults,
+            update=update_naming)
+
+        
