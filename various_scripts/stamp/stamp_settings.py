@@ -23,6 +23,12 @@ from pprint import pprint
 
 
 ### UTILS
+def frames_to_timecode(frame, framerate=25):
+    """from http://stackoverflow.com/questions/8488238/how-to-do-timecode-calculation"""
+    return '{0:02d}:{1:02d}:{2:02d}:{3:02d}'.format(frame // (3600*framerate),
+                                                    frame // (60*framerate) % 60,
+                                                    frame // framerate % 60,
+                                                    frame % framerate)
 
 def get_name_pattern(name, token='#'):
     """Get a string's padding pattern"""
@@ -97,31 +103,6 @@ def padding(s, frame):
 
 
 #####
-
-def add_text(sequencer, text, position, size, channel, frame, align, font_color=[1.0,1.0,1.0]):
-    #TODO: BG
-    #
-
-    # deselect all
-    for s in sequencer.sequences:
-        s.select = False
-
-
-    txt_seq = sequencer.sequences.new_effect('{}_f{:04}'.format(text, frame), 'TEXT', channel, frame, frame+1)
-    txt_seq.text = text
-    # txt_seq.blend_type = 'OVER_DROP'
-    txt_seq.location = position
-    txt_seq.align = align
-    txt_seq.font_size = size
-
-    col_seq = sequencer.sequences.new_effect('{}_f{:04}_BG'.format(text, frame), 'COLOR', channel+1, frame, frame+1)
-    col_seq.color = font_color
-    col_seq.blend_type = 'MULTIPLY'
-    # txt_seq.location = position
-
-    bpy.ops.sequencer.meta_make()
-    meta_strip = sequencer.active_strip
-    meta_strip.blend_type = 'OVER_DROP'
 
 
 class Metadata:
@@ -207,14 +188,44 @@ class Metadata:
             text = self.get_text(f)
             channel = 2
 
-            add_text(self.parent_stamp.sequencer, text, self.get_blender_position(), self.size, channel, f, self.align, self.color)
+            self.add_text(self.parent_stamp.sequencer, text, self.get_blender_position(), self.size, channel, f, self.align, self.color)
             # txt_seq = sequencer.sequences.new_effect('txt_{:04}'.format(f), 'TEXT', 2, f+1, f+2)
             # txt_seq.text = text + ' {:04}'.format(f+1)
             # txt_seq.blend_type = 'OVER_DROP'
 
+    @staticmethod
+    def add_text(sequencer, text, position, size, channel, frame, align, font_color=[1.0,1.0,1.0]):
+        #TODO: BG
+        #
+
+        # deselect all
+        for s in sequencer.sequences:
+            s.select = False
+
+
+        txt_seq = sequencer.sequences.new_effect('{}_f{:04}'.format(text, frame), 'TEXT', channel, frame, frame+1)
+        txt_seq.text = text
+        # txt_seq.blend_type = 'OVER_DROP'
+        txt_seq.location = position
+        txt_seq.align = align
+        txt_seq.font_size = size
+
+        col_seq = sequencer.sequences.new_effect('{}_f{:04}_BG'.format(text, frame), 'COLOR', channel+1, frame, frame+1)
+        col_seq.color = font_color
+        col_seq.blend_type = 'MULTIPLY'
+        # txt_seq.location = position
+
+        bpy.ops.sequencer.meta_make()
+        meta_strip = sequencer.active_strip
+        meta_strip.blend_type = 'OVER_DROP'
+
 class Frame_Metadata(Metadata):
     def get_text(self, frame):
         return '{} : {:02}'.format(self.field, frame)
+
+class Timecode_Metadata(Metadata):
+    def get_text(self, frame):
+        return '{} : {}'.format(self.field, frames_to_timecode(frame))
 
 class Date_Metadata(Metadata):
     def get_text(self, frame):
@@ -331,6 +342,8 @@ class Render_stamp:
             meta_type = Frame_Metadata
         elif meta['field'] == 'Date':
             meta_type = Date_Metadata
+        elif meta['field'] == 'Timecode':
+            meta_type = Timecode_Metadata
         else:
             meta_type = Metadata
 
@@ -383,15 +396,22 @@ def main():
              template_args = f.read()
              template_args = (json.loads(template_args))
 
-        parser = argparse.ArgumentParser(parents=[parser], description=usage_text, epilog="-----"*3)
+        parser = argparse.ArgumentParser(parents=[parser], description=usage_text, conflict_handler='resolve', epilog="-----"*3)
 
         parser.add_argument("image", nargs='+', type=str, help="Path to an image")
 
 
         for arg in template_args:
 
-            parser.add_argument('-{}'.format(arg["field"][0].lower()), '--{}'.format(arg["field"].lower()), dest=arg["field"].lower(),
-                help=arg["field"])
+            # parser.add_argument('-{}'.format(arg["field"][0].lower()), '--{}'.format(arg["field"].lower()), dest=arg["field"].lower(),
+            #     help=arg["field"])
+            if arg["value"] is None:
+                parser.add_argument('--{}'.format(arg["field"].lower()), dest=arg["field"].lower(),
+                    help=arg["field"], action='store_true')
+                
+            else:
+                parser.add_argument('--{}'.format(arg["field"].lower()), dest=arg["field"].lower(),
+                    help=arg["field"])
 
         args = parser.parse_args(argv)
 
@@ -420,9 +440,19 @@ def main():
 
 
     else:
-        parser = argparse.ArgumentParser(parents=[parser], description=usage_text, epilog="-----"*3)
+        usage_text = \
+    """Select images to add to sequence and arguments for metadata.
+Special fields for metada:
+    - date returns today's date by default.
+    - frame returns the current frame
+    - timecode returns the current timecode"""
+        parser = argparse.ArgumentParser(parents=[parser], description=usage_text, epilog="-----"*3, conflict_handler='resolve', formatter_class=argparse.RawTextHelpFormatter)
 
         parser.add_argument("image", nargs='+', type=str, help="Path to an image")
+        parser.add_argument("metadatas", nargs='+', type=str,
+help="""Metadata description. They are of the form:
+field:"Author",value:"Me",position:TOP-LEFT,inline:True, size:15,color:[1,1,1]
+You can specify multiple fields separated by semicolons.""")
         
         args = parser.parse_args(argv)
 
