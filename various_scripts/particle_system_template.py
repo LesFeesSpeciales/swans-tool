@@ -46,7 +46,7 @@ class Particle_system:
 
                 # SIMULATE STUFF HERE
 
-                
+
                 # SET NEW LOCATION
                 part.location += part.velocity
 
@@ -96,6 +96,32 @@ class Particle_system:
         
 
 # Operator and panel for ease of use
+
+def main(context):
+    
+    #Remove objects from previous sim
+    for o in bpy.data.objects:
+        if o.name.startswith('generator') or o.name.startswith('Ico') or o.name.startswith('instance'):
+            o.user_clear()
+            bpy.context.scene.objects.unlink(o)
+            bpy.data.objects.remove(o)
+    
+    number = bpy.context.scene.particles_number
+    start_frame = bpy.context.scene.particles_start_frame
+    end_frame = bpy.context.scene.particles_end_frame
+    scale = bpy.context.scene.particles_scale
+    a_ps = Particle_system()
+    a_ps.add_particles(number)
+    
+    print('\n---')
+    start = time()
+    for f in range(start_frame, end_frame+1):
+#        a_ps.add_particles(1)
+        if f%10 == 0:
+            print('frame: {:04}'.format(f))
+        a_ps.step()
+    print('Simulated in {:05.5f} seconds'.format(time() - start))
+
 
 class SimulationPanel(bpy.types.Panel):
     """"""
