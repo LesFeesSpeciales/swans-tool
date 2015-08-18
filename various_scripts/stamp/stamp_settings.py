@@ -1,21 +1,6 @@
-# This script is an example of how you can run blender from the command line
-# (in background mode with no interface) to automate tasks, in this example it
-# creates a text object, camera and light, then renders and/or saves it.
-# This example also shows how you can parse command line options to scripts.
-#
-# Example usage for this test.
-#  blender --background --factory-startup --python $HOME/background_job.py -- \
-#          --text="Hello World" \
-#          --render="/tmp/hello" \
-#          --save="/tmp/hello.blend"
-#
-# Notice:
-# '--factory-startup' is used to avoid the user default settings from
-#                     interfearing with automated scene generation.
-#
-# '--' causes blender to ignore all following arguments so python can use them.
-#
-# See blender --help for details.
+# TODO
+# - color formats: hex, html names
+
 
 import bpy
 import os, time, json
@@ -390,7 +375,7 @@ def main():
     args, u_args = parser.parse_known_args(argv)
     # print('AFTER')
 
-    ### parse metadata
+    ### parse metadata from template
     if args.template:
         with open(args.template, 'r') as f:
              template_args = f.read()
@@ -399,6 +384,7 @@ def main():
         parser = argparse.ArgumentParser(parents=[parser], description=usage_text, conflict_handler='resolve', epilog="-----"*3)
 
         parser.add_argument("image", nargs='+', type=str, help="Path to an image")
+        parser.add_argument("--default", help="Use all default values", action='store_true')
 
 
         for arg in template_args:
@@ -407,7 +393,7 @@ def main():
             #     help=arg["field"])
             if arg["value"] is None:
                 parser.add_argument('--{}'.format(arg["field"].lower()), dest=arg["field"].lower(),
-                    help=arg["field"], action='store_true')
+                    help=arg["field"], action='store_true', default=None)
                 
             else:
                 parser.add_argument('--{}'.format(arg["field"].lower()), dest=arg["field"].lower(),
@@ -427,7 +413,7 @@ def main():
                 arg_value = getattr(args, arg_key)
                 if arg_value is not None:
                     print (arg_key, ":", arg_value)
-                else:
+                elif not args.default:
                     print(arg, 'JUST POPPED')
                     template_args.remove(arg)
 
