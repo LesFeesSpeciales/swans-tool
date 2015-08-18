@@ -261,7 +261,38 @@ class add_asset(bpy.types.Operator):
                 bpy.context.scene.shoth = True
             print('update shot')
         elif self.add == 'check_sequence':
+            temp = bpy.context.scene.seqn
+            temp = str(temp)
 
+            while len(temp) < 3:
+                temp = '0'+temp
+                    
+            temp = 'S'+temp
+            tp = (str(temp),str(temp),'')
+            if tp not in ressources.Items_seq:
+                ressources.Items_seq.append(tp)
+                interface.UpdateEnum('',ressources.Items_seq,'seq',temp,temp)
+                bpy.context.scene.seq = temp
+                bpy.context.scene.shot = 'none'
+                bpy.context.scene.sequence = False
+            else:
+                ressources.command.append("Sequence already exist")
+        elif self.add == 'check_shot':
+            temp = bpy.context.scene.shotn
+            temp = str(temp)
+
+            while len(temp) < 3:
+                temp = '0'+temp
+                    
+            temp = 'P   '+temp
+            tp = (str(temp),str(temp),'')
+            if tp not in ressources.Items_shot:
+                ressources.Items_shot.append(tp)
+                interface.UpdateEnum('',ressources.Items_shot,'shot',temp,temp)
+                bpy.context.scene.shot = temp
+                bpy.context.scene.shoth = False
+            else:
+                ressources.command.append("Shot already exist")
         return {"FINISHED"}
 
 '''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
