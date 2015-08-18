@@ -54,7 +54,7 @@ def create_naming(self,context,op, path,command):
     c =n(**path)
     print(c.path()) 
     command.append(c.path())
-    bpy.context.scene.wild  = c.is_wild()        
+    #bpy.context.scene.wild  = c.is_wild()        
     if op == 'CREATE':
         print("Create missing folders with naming...")
         c.create()
