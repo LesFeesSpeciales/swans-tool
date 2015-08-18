@@ -101,7 +101,8 @@ def initSceneProperties():
      bpy.types.Scene.asset = EnumProperty(name="none",description="none",items=(('')))
      bpy.types.Scene.seq = EnumProperty(name="none", description="none", items=(('')), update = interface.update_naming)
      bpy.types.Scene.shot = EnumProperty(name="none", description="none", items=(('')), update = interface.update_naming) 
-     
+     bpy.types.Scene.subtypes = EnumProperty(name="subtype", description="subtype", items=((''))) 
+    
      s = len(property)
      
      ressources.Items.append(('none',"none",""))
@@ -202,13 +203,32 @@ def initSceneProperties():
         description = "hide console")
      bpy.types.Scene.wild = BoolProperty(
         name = "is_wild", 
-        default=True,
+        default=False,
+        description = "is the path valid")
+     bpy.types.Scene.sequence = BoolProperty(
+        name = "is_wild", 
+        default=False,
+        description = "is the path valid")
+     bpy.types.Scene.shoth = BoolProperty(
+        name = "is_wild", 
+        default=False,
         description = "is the path valid")
      bpy.types.Scene.hidecreator = BoolProperty(
         name = "hidec", 
         default=False,
         description = "hide console")
-
+     bpy.types.Scene.seqn = IntProperty(
+        min=0,
+        max=999,
+        name = "Sequence", 
+        default=0,
+        description = "sequence number")
+     bpy.types.Scene.shotn = IntProperty(
+        min=0,
+        max=999,
+        name = "Shot", 
+        default=0,
+        description = "Shot number")
 '''---------------------------------------------------
 
                 Basic function 

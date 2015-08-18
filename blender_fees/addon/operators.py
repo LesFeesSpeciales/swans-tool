@@ -211,40 +211,34 @@ class add_asset(bpy.types.Operator):
             interface.update_naming(self,context)
         #SQUENCE------------------------------------------------
         elif self.add == 'seq':
-            #increase the seq
+            ##increase the seq
             ressources.command.append("add a sequence")
             max = 0
             num_seq = ""
             n_num_seq = 0
 
+            #Find the next seq number
             for i in range(len(ressources.Items_seq)):
                 if ressources.Items_seq[i][0]!='none':
                     for z in range(1,len(ressources.Items_seq[i][0])):
                         num_seq = num_seq + ressources.Items_seq[i][0][z]
                     n_num_seq = int(num_seq)
-                    print('MAXXX:'+num_seq)
-                    print
                     if n_num_seq>=max:
-                        print('MAXXX:'+str(max))
                         max = n_num_seq
-                        print('MAX:'+str(max))
                     num_seq = ""
                 
             max = max + 1
-            max = str(max)
+ 
+            bpy.context.scene.seqn = max
 
-            while len(max) < 3:
-                max = '0'+max
-                    
-            max = 'S'+max
-
-            ressources.Items_seq.append((str(max),str(max),''))
-            interface.UpdateEnum('',ressources.Items_seq,'seq',max,max)
-            bpy.context.scene.seq = max
-            bpy.context.scene.shot = 'none'
+            if bpy.context.scene.sequence:
+                bpy.context.scene.sequence = False
+            else:
+                bpy.context.scene.sequence = True
+            print('update sequence')
         #SHOT------------------------------------------------------------
         elif self.add == 'shot':
-            #increase the seq
+            ##increase the seq
             ressources.command.append("add a shot")
             max = 0
             num_shot = ""
@@ -255,25 +249,19 @@ class add_asset(bpy.types.Operator):
                     for z in range(1,len(ressources.Items_shot[i][0])):
                         num_shot = num_shot + ressources.Items_shot[i][0][z]
                     n_num_shot = int(num_shot)
-                    print('MAXXX:'+num_shot)
-                    print
                     if n_num_shot>=max:
-                        print('MAXXX:'+str(max))
                         max = n_num_shot
-                        print('MAX:'+str(max))
                     num_shot = ""
                 
             max = max + 1
-            max = str(max)
+            
+            if bpy.context.scene.shoth:
+                bpy.context.scene.shoth = False
+            else:
+                bpy.context.scene.shoth = True
+            print('update shot')
+        elif self.add == 'check_sequence':
 
-            while len(max) < 3:
-                max = '0'+max
-                    
-            max = 'P'+max
-
-            ressources.Items_shot.append((str(max),str(max),''))
-            interface.UpdateEnum('',ressources.Items_shot,'shot',max,max)
-            bpy.context.scene.shot = max
         return {"FINISHED"}
 
 '''<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
