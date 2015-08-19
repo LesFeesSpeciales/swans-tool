@@ -1,31 +1,21 @@
-﻿bl_info = {
+﻿'''
+Copyright (C) 2015 LES FEES SPECIALES
+
+Created by LES FEES SPECIALES
+
+'''
+
+bl_info = {
     "name": "Les Fees Speciales",
     "author":"Les Fees Speciales",
     "version":(1,0),
     "location": "Tools ",
     "description":"File management tool for production",
     "wiki_url":"http://les-fees-speciales.coop/wiki/",
-    "category":"User"
+    "category":"Production"
 }
 
-'''
-Copyright (C) 2015 LES FEES SPECIALES
 
-Created by LES FEES SPECIALES
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
 import imp
 
 try:
@@ -45,7 +35,7 @@ except:
     from . import persistence
 
 from pprint import pprint #Lib to print dictionnaries
-import addon_utils #utils to find addons path
+import addon_utils        #utils to find addons path
 import bpy                #Blender Libpython3
 import os.path            #Files functions of os lib
 from bpy.props import *   #Blender properties lib
@@ -53,10 +43,8 @@ import sys                #System Libraries
 import json
 
 
-
-for x in range(len(addon_utils.paths())):
-    appending = sys.path.append(addon_utils.paths()[x]+'/addon/python3x') #Appending naming libs
-    print(appending)
+addon_dir = os.path.dirname(__file__)
+sys.path.append(os.path.join(addon_dir, 'python3x')) #Appending naming libs
 import naming.Herakles as naming   #Import naming 
 
 from bpy.props import IntProperty, CollectionProperty #, StringProperty 
@@ -67,14 +55,14 @@ import shutil #Used to copy files
 """_______________________HELP SECTION________________________________
 
 PROP OPTION:
-    prop(data, property, text="", text_ctxt="", translate=True, icon='NONE', expand=False, slider=False, toggle=False, icon_only=False, event=False, full_event=False, emboss=True, index=-1, icon_value=0)
+    prop(data, properties, text="", text_ctxt="", translate=True, icon='NONE', expand=False, slider=False, toggle=False, icon_only=False, event=False, full_event=False, emboss=True, index=-1, icon_value=0)
 
 LAYOUT INFO:
     http://www.blender.org/api/blender_python_api_2_69_3/bpy.types.UILayout.html#bpy.types.UILayout
 test:
 ___________________________________________________________________"""
 
-property = []#contain all props in a near futur.....
+properties = []#contain all props in a near futur.....
 
 #-----NAMING VARS-------
 drives = (('Store',"Store directory",''),('/u/Project/',"/u/Project/",''),('test2_1',"test2_2",''),('',"",''))
@@ -85,10 +73,10 @@ shot = (('shot',"shot",''),('P001',"P001",''),('P002',"P002",''))
 is_wild = 'True'
 
 #adding 
-property.append(drives)
-property.append(asset)
-property.append(seq)
-property.append(shot)
+properties.append(drives)
+properties.append(asset)
+properties.append(seq)
+properties.append(shot)
       
 #...................................
 #         initSceneProperties      #
@@ -101,8 +89,9 @@ def initSceneProperties():
      bpy.types.Scene.asset = EnumProperty(name="none",description="none",items=(('')))
      bpy.types.Scene.seq = EnumProperty(name="none", description="none", items=(('')), update = interface.update_naming)
      bpy.types.Scene.shot = EnumProperty(name="none", description="none", items=(('')), update = interface.update_naming) 
-     
-     s = len(property)
+     bpy.types.Scene.subtypes = EnumProperty(name="subtype", description="subtype", items=((''))) 
+    
+     s = len(properties)
      
      ressources.Items.append(('none',"none",""))
      ressources.Items_asset.append(('none',"none",""))
@@ -112,32 +101,32 @@ def initSceneProperties():
 
      for i in range(s):
         #Setup store dir
-        if property[i][0][0] == 'Store': 
+        if properties[i][0][0] == 'Store': 
             if not persistence.load_config():      
-                for line in range(1,len(property[i])):
-                    ressources.Items.append((str(property[i][line][0]),str(property[i][line][1]),str(property[i][line][2])))         
-            interface.UpdateEnum(bpy.types.Scene,ressources.Items,property[i][0][0],property[i][0][1],ressources.Items[0][0])    
+                for line in range(1,len(properties[i])):
+                    ressources.Items.append((str(properties[i][line][0]),str(properties[i][line][1]),str(properties[i][line][2])))         
+            interface.UpdateEnum(bpy.types.Scene,ressources.Items,properties[i][0][0],properties[i][0][1],ressources.Items[0][0])    
         
         #Setup assets
-        elif property[i][0][0] == 'asset':
-            for line in range(1,len(property[i])):
-                ressources.Items_asset.append((str(property[i][line][0]),str(property[i][line][1]),str(property[i][line][2])))         
+        elif properties[i][0][0] == 'asset':
+            for line in range(1,len(properties[i])):
+                ressources.Items_asset.append((str(properties[i][line][0]),str(properties[i][line][1]),str(properties[i][line][2])))         
                 print(ressources.Items_asset)
-            interface.UpdateEnum(bpy.types.Scene,ressources.Items_asset,property[i][0][0],property[i][0][1],ressources.Items_asset[0][0])
+            interface.UpdateEnum(bpy.types.Scene,ressources.Items_asset,properties[i][0][0],properties[i][0][1],ressources.Items_asset[0][0])
         
         #Setup sequences
-        elif property[i][0][0] == 'seq':
-            for line in range(1,len(property[i])):
-                ressources.Items_seq.append((str(property[i][line][0]),str(property[i][line][1]),str(property[i][line][2])))         
+        elif properties[i][0][0] == 'seq':
+            for line in range(1,len(properties[i])):
+                ressources.Items_seq.append((str(properties[i][line][0]),str(properties[i][line][1]),str(properties[i][line][2])))         
                 print(ressources.Items_seq)
-            interface.UpdateEnum(bpy.types.Scene,ressources.Items_seq,property[i][0][0],property[i][0][1],ressources.Items_seq[0][0])
+            interface.UpdateEnum(bpy.types.Scene,ressources.Items_seq,properties[i][0][0],properties[i][0][1],ressources.Items_seq[0][0])
 
          #Setup shots
-        elif property[i][0][0] == 'shot':
-            for line in range(1,len(property[i])):
-                ressources.Items_shot.append((str(property[i][line][0]),str(property[i][line][1]),str(property[i][line][2])))         
+        elif properties[i][0][0] == 'shot':
+            for line in range(1,len(properties[i])):
+                ressources.Items_shot.append((str(properties[i][line][0]),str(properties[i][line][1]),str(properties[i][line][2])))         
                 print(ressources.Items_shot)
-            interface.UpdateEnum(bpy.types.Scene.shot,ressources.Items_shot,property[i][0][0],property[i][0][1],ressources.Items_shot[0][0])
+            interface.UpdateEnum(bpy.types.Scene.shot,ressources.Items_shot,properties[i][0][0],properties[i][0][1],ressources.Items_shot[0][0])
      
      #ROOT----------------------------->
      bpy.types.Scene.roots = EnumProperty(
@@ -178,44 +167,7 @@ def initSceneProperties():
                ('Shad', "Shad", "")),
         default='none',
         update = interface.update_naming) 
-     #SEQUENCE------------------------------->
-     #bpy.types.Scene.seq = EnumProperty(
-     #   name="type",
-     #   description="/movie/seq",
-     #   items=(('none', "none", ""),
-     #          ('S001', "S001", ""),
-     #          ('S002', "S002", ""),
-     #          ('S004', "S004", ""),
-     #          ('S005', "S005", ""),
-     #          ('S006', "S006", ""),
-     #          ('S007', "S007", ""),
-     #          ('S008', "S008", ""),
-     #          ('S009', "S009", ""),
-     #          ('S010', "S010", ""),
-     #          ('S011', "S011", ""),
-     #          ('S012', "S012", "")),
-     #   default='none',
-     #   update = interface.update_naming)
-     #SHOT------------------------------------>
-     #bpy.types.Scene.shot = EnumProperty(
-     #   name="type",
-     #   description="/movie/seq/shot",
-     #   items=(('none', "none", ""),
-     #          ('P001', "P001", ""),
-     #          ('P002', "P002", ""),
-     #          ('P003', "P003", ""),
-     #          ('P004', "P004", ""),
-     #          ('P005', "P005", ""),
-     #          ('P006', "P006", ""),
-     #          ('P007', "P007", ""),
-     #          ('P008', "P008", ""),
-     #          ('P009', "P009", ""),
-     #          ('P010', "P010", ""),
-     #          ('P011', "P011", ""),
-     #          ('P012', "P012", "")),
-     #   default='none',
-     #   update = interface.update_naming) 
-     #Strings props---------------------------->
+
      bpy.types.Scene.newF = StringProperty(
         name="",
         subtype = 'FILE_NAME',
@@ -239,13 +191,32 @@ def initSceneProperties():
         description = "hide console")
      bpy.types.Scene.wild = BoolProperty(
         name = "is_wild", 
-        default=True,
+        default=False,
+        description = "is the path valid")
+     bpy.types.Scene.sequence = BoolProperty(
+        name = "is_wild", 
+        default=False,
+        description = "is the path valid")
+     bpy.types.Scene.shoth = BoolProperty(
+        name = "is_wild", 
+        default=False,
         description = "is the path valid")
      bpy.types.Scene.hidecreator = BoolProperty(
         name = "hidec", 
         default=False,
         description = "hide console")
-
+     bpy.types.Scene.seqn = IntProperty(
+        min=0,
+        max=999,
+        name = "Sequence", 
+        default=0,
+        description = "sequence number")
+     bpy.types.Scene.shotn = IntProperty(
+        min=0,
+        max=999,
+        name = "Shot", 
+        default=0,
+        description = "Shot number")
 '''---------------------------------------------------
 
                 Basic function 
@@ -259,7 +230,6 @@ def register():
     bpy.utils.register_module(__name__)
     gui.register()
    
-
 def unregister():   
     bpy.utils.unregister_module(__name__)
     gui.unregister()

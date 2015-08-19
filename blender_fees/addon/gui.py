@@ -148,7 +148,24 @@ class naming_panel(bpy.types.Panel):
                 enable(subrow)
 
                 subrow.prop(scn, "seq",expand=False,text='')
-                subrow.operator("scene.add_asset",text="", icon='PLUS').add = 'seq'
+                
+                
+
+                if scn.sequence:
+                    subrow.operator("scene.add_asset",text="", icon='MOVE_UP_VEC').add = 'seq'
+                    subrow = sub.row(align=True)
+                    if scn.shoth or scn.drives=='none':
+                        subrow.enabled = False
+                    else : 
+                        subrow.enabled = True
+                    subrow.prop(scn, "seqn")
+                    subrow.operator("scene.add_asset",text="", icon='PLUS').add = 'check_sequence'
+                else:
+                    if scn.shoth or scn.drives=='none':
+                        subrow.enabled = False
+                    else : 
+                        subrow.enabled = True
+                    subrow.operator("scene.add_asset",text="", icon='MOVE_DOWN_VEC').add = 'seq'
                 #row = box.row()
                 
                 if scn.seq == 'NEW':
@@ -171,7 +188,21 @@ class naming_panel(bpy.types.Panel):
                 subrow = sub.row(align=True)
                 enable(subrow)
                 subrow.prop(scn, "shot",expand=False,text='')
-                subrow.operator("scene.add_asset",text="", icon='PLUS').add = 'shot'
+                if scn.shoth:
+                    subrow.operator("scene.add_asset",text="", icon='MOVE_UP_VEC').add = 'shot'
+                    subrow = sub.row(align=True)
+                    if scn.sequence or scn.drives=='none':
+                        subrow.enabled = False
+                    else : 
+                        subrow.enabled = True
+                    subrow.prop(scn, "shotn")
+                    subrow.operator("scene.add_asset",text="", icon='PLUS').add = 'check_shot'
+                else:
+                    if scn.sequence or scn.drives=='none' :
+                        subrow.enabled = False
+                    else : 
+                        subrow.enabled = True
+                    subrow.operator("scene.add_asset",text="", icon='MOVE_DOWN_VEC').add = 'shot'
                 #row = box.row()
                 
                 if scn.shot == 'NEW':
@@ -274,8 +305,7 @@ class naming_panel(bpy.types.Panel):
                     box2.label(text=">> "+ressources.command[i])
                     box2.scale_y=0.3
                     box2=box.row()
-
-    
+  
 def register():
 
     bpy.types.Scene.custom = CollectionProperty(type=CustomProp)

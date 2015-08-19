@@ -3,18 +3,6 @@ Copyright (C) 2015 LES FEES SPECIALES
 
 Created by LES FEES SPECIALES
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 import bpy
@@ -28,13 +16,11 @@ from bpy.props import *
 from bpy.props import IntProperty, CollectionProperty #, StringProperty 
 from bpy.types import Panel, UIList #Some UI Blender Libs
 import addon_utils #utils to find addons path
-import sys
+import sys, os
 
-for x in range(len(addon_utils.paths())):
-    appending = sys.path.append(addon_utils.paths()[x]+'/addon/python3x') #Appending naming libs
-    print(appending)
+addon_dir = os.path.dirname(__file__)
+sys.path.append(os.path.join(addon_dir, 'python3x')) #Appending naming libs
 import naming.Herakles as naming   #Import naming 
-
 
 '''-----------------------------------------------
 
@@ -55,7 +41,7 @@ def create_naming(self,context,op, path,command):
     c =n(**path)
     print(c.path()) 
     command.append(c.path())
-    bpy.context.scene.wild  = c.is_wild()        
+    #bpy.context.scene.wild  = c.is_wild()        
     if op == 'CREATE':
         print("Create missing folders with naming...")
         c.create()
@@ -146,7 +132,7 @@ def update_naming(self, context):
                 ressources.Items_asset.append((str(temps[i]),str(temps[i]),''))
         UpdateEnum('',ressources.Items_asset,'asset','','')
     #Upgrade sequence
-    elif (bpy.context.scene.roots == 'MOVIE') and (bpy.context.scene.drives != 'none'):
+    elif (bpy.context.scene.roots == 'MOVIE') and (bpy.context.scene.drives != 'none') and (temp['Dept'] == ressources.path['Dept']) and ('Shot' in temp) and ('Sequence' in temp):
         temps = persistence.load_seq()
         for i in range(len(temps)):
             y = (str(temps[i]),str(temps[i]),'')
@@ -155,6 +141,7 @@ def update_naming(self, context):
                 change = True
         if change:
             UpdateEnum('',ressources.Items_seq,'seq','','none')
+            bpy.context.scene.shot = ressources.Items_shot[0][0] 
         elif temp['Shot'] == bpy.context.scene.shot:
             temps = persistence.load_shots()
             ressources.Items_shot.clear()
@@ -163,7 +150,7 @@ def update_naming(self, context):
                 y = (str(temps[i]),str(temps[i]),'')
                 if y not in ressources.Items_shot:
                     ressources.Items_shot.append((str(temps[i]),str(temps[i]),''))
-            UpdateEnum('',ressources.Items_shot,'shot','','none')    
+            UpdateEnum('',ressources.Items_shot,'shot','','none') 
     
     change=False
 
