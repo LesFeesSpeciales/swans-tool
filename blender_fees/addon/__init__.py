@@ -1,31 +1,21 @@
-﻿bl_info = {
+﻿'''
+Copyright (C) 2015 LES FEES SPECIALES
+
+Created by LES FEES SPECIALES
+
+'''
+
+bl_info = {
     "name": "Les Fees Speciales",
     "author":"Les Fees Speciales",
     "version":(1,0),
     "location": "Tools ",
     "description":"File management tool for production",
     "wiki_url":"http://les-fees-speciales.coop/wiki/",
-    "category":"User"
+    "category":"Production"
 }
 
-'''
-Copyright (C) 2015 LES FEES SPECIALES
 
-Created by LES FEES SPECIALES
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
 import imp
 
 try:
@@ -45,7 +35,7 @@ except:
     from . import persistence
 
 from pprint import pprint #Lib to print dictionnaries
-import addon_utils #utils to find addons path
+import addon_utils        #utils to find addons path
 import bpy                #Blender Libpython3
 import os.path            #Files functions of os lib
 from bpy.props import *   #Blender properties lib
@@ -53,10 +43,8 @@ import sys                #System Libraries
 import json
 
 
-
-for x in range(len(addon_utils.paths())):
-    appending = sys.path.append(addon_utils.paths()[x]+'/addon/python3x') #Appending naming libs
-    print(appending)
+addon_dir = os.path.dirname(__file__)
+sys.path.append(os.path.join(addon_dir, 'python3x')) #Appending naming libs
 import naming.Herakles as naming   #Import naming 
 
 from bpy.props import IntProperty, CollectionProperty #, StringProperty 
