@@ -254,7 +254,8 @@ class add_asset(bpy.types.Operator):
                     num_shot = ""
                 
             max = max + 1
-            
+            bpy.context.scene.shotn = max
+
             if bpy.context.scene.shoth:
                 bpy.context.scene.shoth = False
             else:
@@ -284,7 +285,7 @@ class add_asset(bpy.types.Operator):
             while len(temp) < 3:
                 temp = '0'+temp
                     
-            temp = 'P   '+temp
+            temp = 'P'+temp
             tp = (str(temp),str(temp),'')
             if tp not in ressources.Items_shot:
                 ressources.Items_shot.append(tp)
