@@ -55,14 +55,14 @@ import shutil #Used to copy files
 """_______________________HELP SECTION________________________________
 
 PROP OPTION:
-    prop(data, property, text="", text_ctxt="", translate=True, icon='NONE', expand=False, slider=False, toggle=False, icon_only=False, event=False, full_event=False, emboss=True, index=-1, icon_value=0)
+    prop(data, properties, text="", text_ctxt="", translate=True, icon='NONE', expand=False, slider=False, toggle=False, icon_only=False, event=False, full_event=False, emboss=True, index=-1, icon_value=0)
 
 LAYOUT INFO:
     http://www.blender.org/api/blender_python_api_2_69_3/bpy.types.UILayout.html#bpy.types.UILayout
 test:
 ___________________________________________________________________"""
 
-property = []#contain all props in a near futur.....
+properties = []#contain all props in a near futur.....
 
 #-----NAMING VARS-------
 drives = (('Store',"Store directory",''),('/u/Project/',"/u/Project/",''),('test2_1',"test2_2",''),('',"",''))
@@ -73,10 +73,10 @@ shot = (('shot',"shot",''),('P001',"P001",''),('P002',"P002",''))
 is_wild = 'True'
 
 #adding 
-property.append(drives)
-property.append(asset)
-property.append(seq)
-property.append(shot)
+properties.append(drives)
+properties.append(asset)
+properties.append(seq)
+properties.append(shot)
       
 #...................................
 #         initSceneProperties      #
@@ -91,7 +91,7 @@ def initSceneProperties():
      bpy.types.Scene.shot = EnumProperty(name="none", description="none", items=(('')), update = interface.update_naming) 
      bpy.types.Scene.subtypes = EnumProperty(name="subtype", description="subtype", items=((''))) 
     
-     s = len(property)
+     s = len(properties)
      
      ressources.Items.append(('none',"none",""))
      ressources.Items_asset.append(('none',"none",""))
@@ -101,32 +101,32 @@ def initSceneProperties():
 
      for i in range(s):
         #Setup store dir
-        if property[i][0][0] == 'Store': 
+        if properties[i][0][0] == 'Store': 
             if not persistence.load_config():      
-                for line in range(1,len(property[i])):
-                    ressources.Items.append((str(property[i][line][0]),str(property[i][line][1]),str(property[i][line][2])))         
-            interface.UpdateEnum(bpy.types.Scene,ressources.Items,property[i][0][0],property[i][0][1],ressources.Items[0][0])    
+                for line in range(1,len(properties[i])):
+                    ressources.Items.append((str(properties[i][line][0]),str(properties[i][line][1]),str(properties[i][line][2])))         
+            interface.UpdateEnum(bpy.types.Scene,ressources.Items,properties[i][0][0],properties[i][0][1],ressources.Items[0][0])    
         
         #Setup assets
-        elif property[i][0][0] == 'asset':
-            for line in range(1,len(property[i])):
-                ressources.Items_asset.append((str(property[i][line][0]),str(property[i][line][1]),str(property[i][line][2])))         
+        elif properties[i][0][0] == 'asset':
+            for line in range(1,len(properties[i])):
+                ressources.Items_asset.append((str(properties[i][line][0]),str(properties[i][line][1]),str(properties[i][line][2])))         
                 print(ressources.Items_asset)
-            interface.UpdateEnum(bpy.types.Scene,ressources.Items_asset,property[i][0][0],property[i][0][1],ressources.Items_asset[0][0])
+            interface.UpdateEnum(bpy.types.Scene,ressources.Items_asset,properties[i][0][0],properties[i][0][1],ressources.Items_asset[0][0])
         
         #Setup sequences
-        elif property[i][0][0] == 'seq':
-            for line in range(1,len(property[i])):
-                ressources.Items_seq.append((str(property[i][line][0]),str(property[i][line][1]),str(property[i][line][2])))         
+        elif properties[i][0][0] == 'seq':
+            for line in range(1,len(properties[i])):
+                ressources.Items_seq.append((str(properties[i][line][0]),str(properties[i][line][1]),str(properties[i][line][2])))         
                 print(ressources.Items_seq)
-            interface.UpdateEnum(bpy.types.Scene,ressources.Items_seq,property[i][0][0],property[i][0][1],ressources.Items_seq[0][0])
+            interface.UpdateEnum(bpy.types.Scene,ressources.Items_seq,properties[i][0][0],properties[i][0][1],ressources.Items_seq[0][0])
 
          #Setup shots
-        elif property[i][0][0] == 'shot':
-            for line in range(1,len(property[i])):
-                ressources.Items_shot.append((str(property[i][line][0]),str(property[i][line][1]),str(property[i][line][2])))         
+        elif properties[i][0][0] == 'shot':
+            for line in range(1,len(properties[i])):
+                ressources.Items_shot.append((str(properties[i][line][0]),str(properties[i][line][1]),str(properties[i][line][2])))         
                 print(ressources.Items_shot)
-            interface.UpdateEnum(bpy.types.Scene.shot,ressources.Items_shot,property[i][0][0],property[i][0][1],ressources.Items_shot[0][0])
+            interface.UpdateEnum(bpy.types.Scene.shot,ressources.Items_shot,properties[i][0][0],properties[i][0][1],ressources.Items_shot[0][0])
      
      #ROOT----------------------------->
      bpy.types.Scene.roots = EnumProperty(
