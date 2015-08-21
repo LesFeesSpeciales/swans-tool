@@ -6,7 +6,7 @@ from bpy.props import *
 from mathutils import Matrix
 
 
-
+JSON_PATH = '/tmp/'
 
 #----------------------------------------------------------
 # PROPS
@@ -49,12 +49,12 @@ def export_transforms(fileName):
         if bone.id_data.name not in boneTransform_dict:
             boneTransform_dict[bone.id_data.name] = {}
         print('----------------')
-        matrix_final = bone.id_data.matrix_world * bone.matrix
+        matrix_final = bone.matrix_basis
         matrix_json = [tuple(e) for e in list(matrix_final)]
         
         boneTransform_dict[bone.id_data.name][bone.name] = matrix_json
         
-    json_write("D:\_FAC\ColoBlender2015\Pipeline\PoseLib\Matrix", boneTransform_dict, fileName)
+    json_write(JSON_PATH, boneTransform_dict, fileName)
     
     
 def import_transforms(fileName):
@@ -67,7 +67,7 @@ def import_transforms(fileName):
                 bones.append(bone)
     
     json_data = {}
-    json_data = json_read("D:\_FAC\ColoBlender2015\Pipeline\PoseLib\Matrix\\", fileName+".json")    
+    json_data = json_read(JSON_PATH, fileName+".json")
     print("Reading json data")
     
     for bone in bones:
@@ -79,7 +79,8 @@ def import_transforms(fileName):
             matrix_final = Matrix(json_matrix)
             print(bone.name, '\n', matrix_final)
             
-            bone.id_data.matrix_world = matrix_final 
+#            bone.matrix_world = matrix_final
+            bone.matrix_basis = matrix_final
             
             '''
                 else :
@@ -140,7 +141,7 @@ class Pose_export(bpy.types.Operator):
     
     def execute(self, context):
         scn = context.scene
-        if os.path.isfile("D:\_FAC\ColoBlender2015\Pipeline\PoseLib\Matrix\\"+scn['jsonName']+".json"):
+        if os.path.isfile(os.path.join(JSON_PATH+scn['jsonName']+".json")):
             bpy.ops.object.dialog_operator('INVOKE_DEFAULT') #calls the popup
         else:
             self.report({'INFO'}, "Creating the pose in library")
@@ -154,7 +155,7 @@ class Pose_import(bpy.types.Operator):
  
     def execute(self, context):
         scn = context.scene
-        if os.path.isfile("D:\_FAC\ColoBlender2015\Pipeline\PoseLib\Matrix\\"+scn['jsonName']+".json"):
+        if os.path.isfile(os.path.join(JSON_PATH+scn['jsonName']+".json")):
             self.report({'INFO'}, "Loading the pose in library")
             import_transforms(scn['jsonName'])
         else:
@@ -176,7 +177,7 @@ class DialogOperator(bpy.types.Operator):
         scn = context.scene
         if self.overwrite:
             print("Overwriting the file ", bpy.context.scene['jsonName'], ".json")
-            os.remove("D:\_FAC\ColoBlender2015\Pipeline\PoseLib\Matrix\\"+scn['jsonName']+".json")
+            os.remove(os.path.join(JSON_PATH+scn['jsonName']+".json"))
             export_transforms(scn['jsonName'])
         return {'FINISHED'}
     
