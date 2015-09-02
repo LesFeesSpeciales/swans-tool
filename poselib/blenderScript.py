@@ -215,4 +215,4 @@ if __name__ == "__main__":
     register()
 
 # bpy.ops.lfs.pose_lib("EXEC_DEFAULT", action="SNAPSHOT")
-
+bpy.ops.lfs.pose_lib("EXEC_DEFAULT", action="START_SERVER")
