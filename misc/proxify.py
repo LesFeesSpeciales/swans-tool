@@ -1,3 +1,15 @@
+bl_info = {
+    "name": "Proxy Images",
+    "author": "Les fees speciales",
+    "version": (1, 0),
+    "blender": (2, 75, 0),
+    "location": "Image Editor > Toolbar",
+    "description": "Reduce the size of image textures, for interactive performance",
+    "warning": "",
+    "wiki_url": "",
+    "category": "Image",
+    }
+
 import bpy
 import os
 
@@ -25,7 +37,6 @@ def proxify(img):
         img['use_alpha'] = img_orig.use_alpha
         img.use_alpha = True
         
-        #SCALE
         dest = bpy.context.scene.proxy_destination
         w, h = img.size
         h *= dest/w
@@ -34,25 +45,12 @@ def proxify(img):
 
         path, ext = os.path.splitext(bpy.path.abspath(img.filepath))
         path, filename = os.path.split(path)
-        #path = os.path.join(path, 'proxy')
         filename += "_proxy" + ext
         path = os.path.join(path, 'proxy', filename)
         img.save_render(path, scene=bpy.context.scene)
         img.filepath = path
         
         img.reload()
-
-    #        for obj in bpy.context.selected_objects:
-    #            img = obj.active_material.active_texture.image
-    #            img.reload()
-    #            img_copy = img.copy()
-    #            img_copy.name = img.name + "_orig"
-    #            img.scale(img.size[0]*0.2, img.size[1]*0.2)
-    #            path = bpy.path.abspath('//'+img.name.split(".")[0]+"_proxy.png")
-    #            img.save_render(path)
-    #         
-    #            img.filepath = img.filepath.split(".")[0] + "_proxy.png"
-    #            img.reload()
 
 def get_selected_images():
     images_selected = set()
@@ -69,15 +67,8 @@ class ImageProxify(bpy.types.Operator):
     bl_idname = "image.proxify"
     bl_label = "Proxify Images"
 
-#    @classmethod
-#    def poll(cls, context):
-#        return context.active_object is not None
-
     def execute(self, context):
         images_to_process = get_selected_images() if bpy.context.scene.proxy_only_selected else bpy.data.images
-        
-#        if bpy.context.scene.proxy_only_selected:
-            
         
         number_imgs = len(images_to_process)
         
@@ -108,10 +99,6 @@ class ImageDeProxify(bpy.types.Operator):
     bl_idname = "image.deproxify"
     bl_label = "Deproxify Images"
 
-#    @classmethod
-#    def poll(cls, context):
-#        return context.active_object is not None
-
     def execute(self, context):
         #try to avoid crashing when an original image is visible in UI and deleted
         for area in bpy.context.screen.areas:
@@ -121,17 +108,12 @@ class ImageDeProxify(bpy.types.Operator):
                     area.spaces.active.image = None
         
         images_to_process = get_selected_images() if bpy.context.scene.proxy_only_selected else bpy.data.images
-        for img in images_to_process:
+        number_imgs = len(images_to_process)
+        for i, img in enumerate(images_to_process):
+            print("Deproxy: processing image {:03} of {:03} : {}".format(i+1, number_imgs, img.name))
             deproxify(img)
         return {'FINISHED'}
             
-#        for obj in bpy.context.selected_objects:
-#            tex = obj.active_material.active_texture
-#            img = tex.image.name
-#            print(img)
-#            orig_img = bpy.data.images[img+"_orig"]
-#            tex.image = orig_img
-
 class ImageProxyPanel(bpy.types.Panel):
     """Image proxy panel"""
     bl_label = "Image proxy"
@@ -165,26 +147,23 @@ class ImageProxyPanel(bpy.types.Panel):
             col.label("This image is an original one.")
         else:
             col.label("This image is a proxy.")
-            col.label("Its width is %s pixels" % img.size[0])
+        col.label("Its width is %s pixels" % img.size[0])
             
-#        col.label("This image is %sa proxy." % ("not " if (not 'is_proxy' in img or not img['is_proxy']) else ""))
-#        col.label(str(context.area.spaces.active.image['is_proxy']))
-        
 def register():
-    bpy.types.Scene.proxy_width_threshold = bpy.props.IntProperty(name='Width threshold', description='Resize images if wider than this size', min=1, soft_max=4096, default = 1024)
-    bpy.types.Scene.proxy_destination = bpy.props.IntProperty(name='Destination size', description='Resize images to this size', min=1, soft_max=4096, default = 1024)
+    bpy.types.Scene.proxy_width_threshold = bpy.props.IntProperty(name='Width threshold', description='Resize images if wider than this', min=1, soft_max=4096, default = 1024)
+    bpy.types.Scene.proxy_destination = bpy.props.IntProperty(name='Destination width', description='Resize images to this width', min=1, soft_max=4096, default = 1024)
     bpy.types.Scene.proxy_only_selected = bpy.props.BoolProperty(name='Only selected objects', description='Resize textures only on selected objects', default=False)
     bpy.utils.register_class(ImageProxify)
     bpy.utils.register_class(ImageDeProxify)
     bpy.utils.register_class(ImageProxyPanel)
 
-
 def unregister():
     bpy.utils.unregister_class(ImageProxify)
     bpy.utils.unregister_class(ImageDeProxify)
     bpy.utils.unregister_class(ImageProxyPanel)
-
-
+    del bpy.types.Scene.proxy_width_threshold
+    del bpy.types.Scene.proxy_destination
+    del bpy.types.Scene.proxy_only_selected
 
 if __name__ == "__main__":
     register()
