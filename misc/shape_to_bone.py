@@ -4,12 +4,21 @@ import bpy
 def main(context):
     obj = context.selected_objects[-2]
     pbone = context.active_pose_bone
+
+    mesh_copy = obj.to_mesh(context.scene, True, 'PREVIEW')
+    mesh_copy.name = 'WGT_' + pbone.name
+    obj_copy = bpy.data.objects.new('WGT_' + pbone.name, mesh_copy)
+    context.scene.objects.link(obj_copy)
+
+#    obj_copy.matrix_world.identity()
+    obj_copy.layers = [False if i != 19 else True for i in range(20)]
+
     b_length = pbone.bone.length
 
-    pbone.custom_shape = obj
+    pbone.custom_shape = obj_copy
     pbone.bone.show_wire = True
 
-    for v in obj.data.vertices:
+    for v in obj_copy.data.vertices:
         v.co = (1 / b_length) * pbone.matrix.inverted() * obj.matrix_world * v.co
 
 
@@ -20,8 +29,7 @@ class ShapeToBone(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        len(context.selected_objects) > 1 and context.active_pose_bone is not None
-        return context.active_object is not None
+        return len(context.selected_objects) > 1 and context.active_pose_bone is not None
 
     def execute(self, context):
         main(context)
