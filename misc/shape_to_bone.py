@@ -28,8 +28,20 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license and that you accept its terms.
 
-import bpy
 
+bl_info = {
+    "name": "Shape To Bone",
+    "author": "Les fees speciales",
+    "version": (0, 1),
+    "blender": (2, 75, 0),
+    "location": "View 3D > Tools",
+    "description": "Use selected object as the shape for active bone.",
+    "warning": "",
+    "wiki_url": "",
+    "category": "Rigging",
+}
+
+import bpy
 
 def main(context):
     selected = context.selected_objects[:]
@@ -68,13 +80,28 @@ class ShapeToBone(bpy.types.Operator):
         main(context)
         return {'FINISHED'}
 
+class ShapeToBonePanel(bpy.types.Panel):
+    """Shape To Bone"""
+    bl_label = "Shape To Bone"
+    bl_idname = "SCENE_PT_shape_bone"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'TOOLS'
+    bl_context = 'posemode'
+    bl_category = 'Tools'
+
+    def draw(self, context):
+        layout = self.layout
+
+        layout.operator("pose.shape_to_bone")
 
 def register():
     bpy.utils.register_class(ShapeToBone)
+    bpy.utils.register_class(ShapeToBonePanel)
 
 
 def unregister():
     bpy.utils.unregister_class(ShapeToBone)
+    bpy.utils.unregister_class(ShapeToBonePanel)
 
 
 if __name__ == "__main__":
