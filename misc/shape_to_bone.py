@@ -2,7 +2,9 @@ import bpy
 
 
 def main(context):
-    obj = context.selected_objects[-2]
+    selected = context.selected_objects[:]
+    selected.remove(context.object)
+    obj = selected[0]
     pbone = context.active_pose_bone
 
     mesh_copy = obj.to_mesh(context.scene, True, 'PREVIEW')
@@ -23,7 +25,8 @@ def main(context):
 
 
 class ShapeToBone(bpy.types.Operator):
-    """Reposition object so that the active bone take the objects' shape"""
+    """Reposition selected mesh so that the active bone takes the mesh as custom shape.
+    You need to be in pose mode with a mesh object selected."""
     bl_idname = "pose.shape_to_bone"
     bl_label = "Shape To Bone"
 
@@ -47,5 +50,3 @@ def unregister():
 if __name__ == "__main__":
     register()
 
-    # test call
-    bpy.ops.pose.shape_to_bone()
