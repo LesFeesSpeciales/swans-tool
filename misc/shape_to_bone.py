@@ -32,7 +32,7 @@
 bl_info = {
     "name": "Shape To Bone",
     "author": "Les fees speciales",
-    "version": (0, 1),
+    "version": (0, 1, 2),
     "blender": (2, 75, 0),
     "location": "View 3D > Tools",
     "description": "Use selected object as the shape for active bone.",
@@ -42,6 +42,7 @@ bl_info = {
 }
 
 import bpy
+from mathutils import Matrix
 
 def main(context):
     selected = context.selected_objects[:]
@@ -49,9 +50,14 @@ def main(context):
     obj = selected[0]
     pbone = context.active_pose_bone
 
+    mesh_name = 'WGT_' + pbone.name
+
+    if mesh_name in context.object:
+        context.object[mesh_name].user_clear()
+
     mesh_copy = obj.to_mesh(context.scene, True, 'PREVIEW')
-    mesh_copy.name = 'WGT_' + pbone.name
-    obj_copy = bpy.data.objects.new('WGT_' + pbone.name, mesh_copy)
+    mesh_copy.name = mesh_name
+    obj_copy = bpy.data.objects.new(mesh_name, mesh_copy)
     context.scene.objects.link(obj_copy)
 
 #    obj_copy.matrix_world.identity()
@@ -80,6 +86,43 @@ class ShapeToBone(bpy.types.Operator):
         main(context)
         return {'FINISHED'}
 
+def edit_bone_shape(context):
+    """Function for bone shape editing"""
+    pbone = context.active_pose_bone
+    shape_object = pbone.custom_shape
+    shape_layers = shape_object.layers
+
+    if not shape_object.name in context.scene.objects:
+        context.scene.objects.link(shape_object)
+
+    shape_object.layers = context.object.layers
+
+    #XXX TODO MOFO
+    shape_object.matrix_world = (pbone.bone.length) * context.object.matrix_world * pbone.matrix# * (pbone.bone.length)
+    shape_object.location = pbone.head
+    #shape_object.matrix_world = context.object.matrix_world * pbone.matrix * shape_object.matrix_world.inverted() * (pbone.bone.length) * shape_object.matrix_world
+    shape_object.hide = False
+
+#    bpy.ops.object.mode_set(mode='OBJECT')
+    context.object.select = False
+    context.scene.objects.active = shape_object
+    bpy.ops.object.mode_set(mode='EDIT')
+    
+
+class EditBoneShape(bpy.types.Operator):
+    """Add mesh object at same postion as current bone. You can then edit it and reapply it."""
+    bl_idname = "pose.edit_bone_shape"
+    bl_label = "Edit Bone Shape"
+
+    @classmethod
+    def poll(cls, context):
+        return context.mode == 'POSE' and context.active_pose_bone and context.active_pose_bone.custom_shape
+#        return len(context.selected_objects) > 1 and context.active_pose_bone is not None
+
+    def execute(self, context):
+        edit_bone_shape(context)
+        return {'FINISHED'}
+
 class ShapeToBonePanel(bpy.types.Panel):
     """Shape To Bone"""
     bl_label = "Shape To Bone"
@@ -92,14 +135,18 @@ class ShapeToBonePanel(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
 
-        layout.operator("pose.shape_to_bone")
+        col = layout.column(align=True)
+        col.operator("pose.shape_to_bone")
+        col.operator("pose.edit_bone_shape")
 
 def register():
     bpy.utils.register_class(ShapeToBone)
+    bpy.utils.register_class(EditBoneShape)
     bpy.utils.register_class(ShapeToBonePanel)
 
 
 def unregister():
+    bpy.utils.unregister_class(EditBoneShape)
     bpy.utils.unregister_class(ShapeToBone)
     bpy.utils.unregister_class(ShapeToBonePanel)
 
