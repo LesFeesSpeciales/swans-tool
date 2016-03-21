@@ -52,12 +52,14 @@ def main(context):
 
     mesh_name = 'WGT_' + pbone.name
 
-    if mesh_name in context.object:
-        context.object[mesh_name].user_clear()
+    if mesh_name in context.scene.objects:
+        context.scene.objects.unlink(context.scene.objects[mesh_name])
+        bpy.data.objects[mesh_name].user_clear()
 
     mesh_copy = obj.to_mesh(context.scene, True, 'PREVIEW')
     mesh_copy.name = mesh_name
     obj_copy = bpy.data.objects.new(mesh_name, mesh_copy)
+    obj_copy.name = mesh_name
     context.scene.objects.link(obj_copy)
 
 #    obj_copy.matrix_world.identity()
@@ -67,9 +69,9 @@ def main(context):
 
     pbone.custom_shape = obj_copy
     pbone.bone.show_wire = True
-
+    
     for v in obj_copy.data.vertices:
-        v.co = (1 / b_length) * pbone.matrix.inverted() * obj.matrix_world * v.co
+        v.co = (context.object.matrix_world * pbone.matrix * b_length).inverted() * obj.matrix_world * v.co
 
 
 class ShapeToBone(bpy.types.Operator):
