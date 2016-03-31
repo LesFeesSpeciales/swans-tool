@@ -1,6 +1,6 @@
-# tools
+# swans-tool
 
-Set of various tools used in Production or proof of concepts
+An ancient blender addon, used to create and manage blend files according to a defined hierarchy.
 
 
 # License
